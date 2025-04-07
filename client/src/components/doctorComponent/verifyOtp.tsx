@@ -28,7 +28,7 @@ export default function DoctorOTPVerification() {
     }
   }, [timer]);
 
-  // ✅ Verify OTP
+ 
   const handleVerifyOtp = async () => {
     setError("");
     setLoading(true);
@@ -43,11 +43,14 @@ export default function DoctorOTPVerification() {
       const response = await verifyOtp(email, otp);
       setMessage("OTP Verified Successfully!");
       let id=localStorage.getItem("doctorId")
-      
+      console.log(response)
+      if(response.status === 200){       
       router.push(`/doctor/${id}/dashboard`);
       toast.success("Enter to doctor dashboard")
+      }
+ 
     } catch (err: any) {
-      // toast.error(err?.response?.data?.messa)
+      toast.error(err?.response?.data?.message)
       // console.log(Response);
       setError(err.response?.data?.message || "OTP verification failed");
     } finally {
