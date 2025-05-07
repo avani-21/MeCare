@@ -77,18 +77,18 @@ const PatientTable = () => {
     <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
       <thead>
         <tr className="bg-teal-700 text-white">
+        <th className="px-4 py-3 text-left">Id</th>
           <th className="px-4 py-3 text-left">Patient</th>
           <th className="px-4 py-3 text-left">Email</th>
-          {/* <th className="px-4 py-3 text-left">Phone</th> */}
-          {/* <th className="px-4 py-3 text-left">Address</th> */}
-          {/* <th className="px-4 py-3 text-left">Age</th> */}
           <th className="px-4 py-3 text-left">Status</th>
-          <th className="px-4 py-3 text-left">Actions</th>
+          {/* <th className="px-4 py-3 text-left">Actions</th> */}
         </tr>
       </thead>
       <tbody>
         {filteredPatient?.map((patient) => (
           <tr key={patient._id} className="border-b border-gray-200">
+           <td className="px-4 font-semibold">{patient._id}</td>
+
             <td className="px-4 py-4 flex items-center space-x-4">
               <Image
                 src={patient.profileImage || "/placeholder-profile.png"}
@@ -120,14 +120,14 @@ const PatientTable = () => {
                 {patient.isVerified ? "Verified" : "Unverified"}
               </span>
             </td>
-            <td className="px-4 py-4">
+            {/* <td className="px-4 py-4">
               <button
                 className="px-4 py-2 text-white bg-teal-600 rounded-md hover:bg-blue-700"
                 onClick={() => alert(`Viewing history for ${patient.name}`)}
               >
                 View Medical History
               </button>
-            </td>
+            </td> */}
           </tr>
         ))}
       </tbody>

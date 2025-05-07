@@ -1,40 +1,29 @@
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
+// import { cookies } from "next/headers";
 
 const API = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true,
 });
 
+API.interceptors.request.use((config) => {
+    let accessToken = "";
+     console.log(config.url)
+    if (config.url?.startsWith("/doctor")) {
+        accessToken = Cookies.get("DoctorToken") || "";
+    }
+    else if (config.url?.startsWith("/admin")) {
+        accessToken = Cookies.get("adminToken") || "";
+    } else {
+        accessToken = Cookies.get("patientToken") || "";
+    }
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
 
-const getCookie = (name: string) => Cookies.get(name);
-console.log("test")
-console.log(getCookie("DoctorToken"))
-
-API.interceptors.request.use(
-    (config) => {
-        let accessToken = null;
-
-        if (config.url?.includes("/doctor")) {
-            accessToken = getCookie("DoctorToken");
-            console.log("dddd",getCookie("DoctorToken"))
-        } else if (config.url?.includes("/admin")) {
-            accessToken = getCookie("adminToken");
-        } else {
-            accessToken = getCookie("patientToken");
-        }
-
-        if (accessToken) {
-            console.log("Token found in cookies:", accessToken);
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        } else {
-            console.log("No token found in cookies for request:", config.url?.includes("/doctor"));
-        }
-
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+    return config;
+});
 
 
 API.interceptors.response.use(
@@ -42,37 +31,26 @@ API.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+        if (
+            error.response?.status === 401 &&
+            error.response?.data?.code === "TOKEN_EXPIRED"
+        ) {
             try {
-                let refreshUrl = "/api/patient/refresh_token";
-                let accessTokenCookieName = "patientToken";
-                if (originalRequest.url.includes("/doctor")) {
-                    refreshUrl = "/doctor/refresh_token";
-                    accessTokenCookieName = "DoctorToken";
-                } else if (originalRequest.url.includes("/admin")) {
-                    refreshUrl = "/admin/refresh_token";
-                    accessTokenCookieName = "adminToken";
-                }
+                const res = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/admin/refresh_token`,
+                    { withCredentials: true }
+                );
 
-                const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}${refreshUrl}`, {
-                    withCredentials: true,
-                });
+                const newAccessToken = res.data.accessToken;
+                Cookies.set("adminToken", newAccessToken);
 
-                if (!data.accessToken) {
-                    throw new Error("No new access token received");
-                  }
-
-                Cookies.set(accessTokenCookieName, data.accessToken);
-                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return API(originalRequest);
-            } catch (err) {
-                console.error("Refresh token failed", err);
-                Cookies.remove("doctorToken");
-                Cookies.remove("adminToken");
-                Cookies.remove("patientToken");
-                return Promise.reject(error);
+            } catch (refreshError) {
+                if (typeof window !== "undefined") {
+                    window.location.href = "/login"; 
+                }
+                return Promise.reject(refreshError);
             }
         }
 
@@ -80,4 +58,7 @@ API.interceptors.response.use(
     }
 );
 
+
 export default API;
+
+

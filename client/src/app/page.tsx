@@ -10,11 +10,10 @@ function page() {
   return (
     <div>
         <Navbar/>
-       <Banner1/>
-       <Spacialities/>
-       <Banner2/>
-       <Footer/>
-
+        <Banner1/>
+        <Spacialities/>
+        <Banner2/>
+        <Footer/>
     </div>
   )
 }

@@ -150,7 +150,7 @@ export default function PatientLogin() {
               <div className="text-red-600">{error.password}</div>
             )}
             <Link
-              href="/forgot-password"
+              href="/otp_send"
               className="text-teal-600 text-sm float-left mt-2 hover:underline"
             >
               Forgot password?

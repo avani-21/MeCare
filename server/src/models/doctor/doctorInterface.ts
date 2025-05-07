@@ -25,6 +25,10 @@ import mongoose,{Document} from "mongoose";
     createdAt: Date;
     rating: number;
     otp?:string;
-    otpExpiration?:string
+    otpExpiration?:string;
+    absentDays?:Date[];
+    startHour?: number;    
+    endHour?: number;      
+    slotDuration?: number; 
   }
-  
+ 

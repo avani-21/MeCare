@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../../public/logo.png";
 import { Menu, X } from "lucide-react";
-import nookies from "nookies";
+import Cookies from "js-cookie";
 
 
 export default  function Navbar() {
@@ -12,11 +12,11 @@ export default  function Navbar() {
   const [patientToken, setPatientToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const cookies = nookies.get();
+    const cookies = Cookies.get();
+    console.log("cookies",cookies)
     const token = cookies.patientToken || null;
     setPatientToken(token);
   }, []);
-
 
 
   return (
@@ -40,7 +40,7 @@ export default  function Navbar() {
 
         <div className="hidden md:block">
           { patientToken ? (
-            <Link href="/profile" className="bg-gray-300 px-4 py-2 rounded-full">
+            <Link href="/profile"  className="bg-teal-600 text-white px-6 py-2 mr-12 rounded-full hover:bg-teal-700">
               Profile
             </Link>
           ) : (

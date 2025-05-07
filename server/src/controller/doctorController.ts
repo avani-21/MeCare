@@ -7,6 +7,7 @@ import { errorResponse, successResponse } from "../types/types";
 import jwt from "jsonwebtoken";
 import { generateAccessToken } from "../utils/jwtHelper";
 import logger from "../utils/logger";
+import { StatusMessages } from "../utils/message";
 
 @injectable()
 class DoctorController {
@@ -14,12 +15,39 @@ class DoctorController {
         logger.info("DoctorController initialized");
     }
 
-    async getApprovedDoctors(req: Request, res: Response) {
+    async getApprovedDoctors(req: Request, res: Response):Promise<void> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            
+            const filters: {
+                specialization?: string;
+                gender?: string;
+                experience?: number;
+              } = {};
+          
+              if (req.query.specialization) {
+                filters.specialization = req.query.specialization as string;
+              }
+              if (req.query.gender) {
+                filters.gender = req.query.gender as string;
+              }
+              if (req.query.experience) {
+                filters.experience = parseInt(req.query.experience as string);
+              }
+
             logger.debug("Fetching approved doctors");
-            const doctors = await this._doctorService.getApprovedDoctors();
+            const {doctors,total }= await this._doctorService.getApprovedDoctors(page,limit,filters);
             logger.info(`Fetched approved doctors`);
-            return res.status(HttpStatus.OK).json(successResponse("Doctor data fetched successfully", doctors));
+            res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, {
+                data:doctors,
+                meta:{
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit),
+                }
+            }));
         } catch (error) {
             logger.error("Error fetching approved doctors", { error });
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse("Internal server error"));
@@ -32,10 +60,10 @@ class DoctorController {
             logger.debug(`Sending OTP to ${email}`);
             const result = await this._doctorService.sendOtp(email);
             logger.info(`OTP sent to ${email}`);
-            res.status(HttpStatus.OK).json(successResponse(result));
+            res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,result));
         } catch (error: any) {
             logger.error(`OTP send failed for ${req.body.email}`, { error: error.message });
-            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(error.message));
+            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
         }
     }
 
@@ -65,7 +93,7 @@ class DoctorController {
             res.status(HttpStatus.OK).json({ id, accessToken, refreshToken });
         } catch (error: any) {
             logger.error(`OTP verification failed for ${req.body.email}`, { error: error.message });
-            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(error.message));
+            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
         }
     }
 
@@ -75,10 +103,10 @@ class DoctorController {
             logger.debug(`Resending OTP to ${email}`);
             const response = await this._doctorService.resendOtp(email);
             logger.info(`OTP resent to ${email}`);
-            res.status(HttpStatus.OK).json(successResponse(response));
+            res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,response));
         } catch (error: any) {
             logger.error(`OTP resend failed for ${req.body.email}`, { error: error.message });
-            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(error.message));
+            res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
         }
     }
 
@@ -87,16 +115,16 @@ class DoctorController {
             const { email } = req.body;
             if (!email) {
                 logger.warn("Google auth attempted without email");
-                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse("Email is required"));
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.EMAIL_REQUIRED));
             }
             
             logger.debug(`Processing Google auth for ${email}`);
             await this._doctorService.googleAuth(email);
             logger.info(`Google auth OTP sent to ${email}`);
-            res.status(HttpStatus.OK).json(successResponse("OTP sent to email for Google login."));
+            res.status(HttpStatus.OK).json(successResponse(StatusMessages.OTP_SENT));
         } catch (error: any) {
             logger.error("Google auth failed", { error: error.message });
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse('Google authentication failed.'));
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR));
         }
     }
 
@@ -105,7 +133,7 @@ class DoctorController {
             const doctorId = req.params.doctorId;
             if (!doctorId) {
                 logger.warn("Update attempted without doctorId");
-                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse("Doctor id is required"));
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT));
             }
 
             logger.debug(`Updating doctor ${doctorId}`);
@@ -116,11 +144,11 @@ class DoctorController {
                 res.status(HttpStatus.OK).json(updatedDoctor);
             } else {
                 logger.warn(`Doctor not found for update: ${doctorId}`);
-                res.status(HttpStatus.NOT_FOUND).json(errorResponse("Doctor not found"));
+                res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
             }
         } catch (error: any) {
             logger.error(`Error updating doctor ${req.params.doctorId}`, { error: error.message });
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(error.message));
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
         }
     }
 
@@ -129,7 +157,7 @@ class DoctorController {
             const doctorId = req.params.doctorId;
             if (!doctorId) {
                 logger.warn("Doctor fetch attempted without ID");
-                return res.status(HttpStatus.NOT_FOUND).json(errorResponse("Doctor not found"));
+                return res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.ID_NOT_FOUNT));
             }
 
             logger.debug(`Fetching doctor ${doctorId}`);
@@ -137,14 +165,14 @@ class DoctorController {
             
             if (doctor) {
                 logger.info(`Doctor ${doctorId} fetched successfully`);
-                return res.status(HttpStatus.OK).json(successResponse("Doctor data fetched successfully", doctor));
+                return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, doctor));
             } else {
                 logger.warn(`Doctor not found: ${doctorId}`);
-                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse("Doctor not found"));
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR));
             }
         } catch (error: any) {
             logger.error(`Error fetching doctor ${req.params.doctorId}`, { error: error.message });
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse("Internal server error"));
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR));
         }
     }
 
@@ -182,6 +210,26 @@ class DoctorController {
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(error.message));
         }
     }
+
+    async getSingleDoctor(req:Request,res:Response){
+        try {
+            const id=req.params.id
+            if(!id){
+                logger.warn("Id is  missing")
+                return res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.ID_NOT_FOUNT))
+            }
+            const doctor=await this._doctorService.getDoctor(id)
+            logger.info("Doctor data fetched successfully",doctor)
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,doctor))
+
+        } catch (error:any) {
+            logger.error("Server error",error.message)
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+    
+
+
 }
 
 export default DoctorController;

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { editDoctor } from "@/lib/api/admin/doctorRegister";
 import { toggleApprovelStatus } from "@/lib/api/admin/doctorRegister";
 
+
 export interface IDoctor {
   _id: string;
   profileImg: string;
@@ -42,8 +43,8 @@ export default function DoctorList() {
 
   const specializations = [
     "General physician",
-    "Gynecologist",
-    "Pediatricians",
+    "Gynacologist",
+    "Pediatrition",
     "Neurologist",
   ];
   const fetchDoctors = async (page: number = 1) => {

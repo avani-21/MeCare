@@ -13,10 +13,7 @@ import logger from "../utils/logger";
  class DoctorService implements IDoctorService{
    constructor(@inject(TYPES.DoctorRepository) private doctorRepository:IDoctorRepo ){}
 
-   async getApprovedDoctors(): Promise<IDoctor[] | null> {
-    logger.info("Attempting to fetch doctors with approved status")
-       return await this.doctorRepository.getApprovedDoctors()
-   }
+  
 
    async sendOtp(email: string): Promise<string> {
     logger.debug(`Sending OTP to ${email}`);
@@ -133,6 +130,22 @@ import logger from "../utils/logger";
     logger.debug(`Processing Google auth for ${email}`);
     await this.sendOtp(email)
   }
+
+
+  async getApprovedDoctors(
+    page: number = 1,
+    limit: number = 3,
+    filters?: {
+      specialization?: string;
+      gender?: string;
+      experience?: number;
+    }
+  ): Promise<{ doctors: IDoctor[]; total: number }> {
+
+  let result= await this.doctorRepository.getApprovedDoctors(page, limit,filters);
+  console.log("result",result)
+  return result
+}
    
 }
 

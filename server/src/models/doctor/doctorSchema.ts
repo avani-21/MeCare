@@ -26,7 +26,8 @@ const doctorSchema=new Schema<IDoctor>(
       state: { type: String, required: true },
       pincode: { type: String, required: true }, 
       otp:{type:String},
-      otpExpiration:{type:Date} 
+      otpExpiration:{type:Date}, 
+      absentDays:{type:[Date]}
     },
     {timestamps:true}
 )

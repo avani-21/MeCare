@@ -5,6 +5,7 @@ import TYPES from "../di/types";
 import { HttpStatus } from "../utils/httptatus";
 import { errorResponse, successResponse } from "../types/types";
 import logger from "../utils/logger";
+import { StatusMessages } from "../utils/message";
 
 @injectable()
 class DocRegController {
@@ -27,9 +28,9 @@ class DocRegController {
       });
 
       const newDoctor = await this._doctorService.registerDoctor(doctorData, files);
-      
+      //  console.log(newDoctor)
       logger.info("Doctor registered successfully", { doctorId: newDoctor.id });
-      res.status(HttpStatus.CREATED).json(successResponse("Doctor registered successfully", newDoctor));
+      res.status(HttpStatus.CREATED).json(successResponse(StatusMessages.CREATED, newDoctor));
     } catch (error: any) {
       logger.error("Failed to register doctor", { 
         error: error.message,
@@ -48,12 +49,12 @@ class DocRegController {
 
       if (!doctor) {
         logger.warn(`Doctor not found for email: ${email}`);
-        res.status(HttpStatus.NOT_FOUND).json(errorResponse("Doctor not found"));
+        res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
         return;
       }
 
       logger.debug("Doctor fetched successfully", { doctorId: doctor.id });
-      res.status(HttpStatus.OK).json(successResponse("Doctor fetched successfully", doctor));
+      res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, doctor));
     } catch (error: any) {
       logger.error("Error fetching doctor by email", {
         error: error.message,
@@ -81,7 +82,7 @@ class DocRegController {
       const { doctors, total } = await this._doctorService.getAllDoctors(page, limit, filters);
       
       logger.debug(`Fetched ${doctors.length} doctors out of ${total}`);
-      res.status(HttpStatus.OK).json(successResponse("Doctors fetched successfully", {
+      res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, {
         data: doctors,
         meta: {
           total,
@@ -114,19 +115,19 @@ class DocRegController {
       const updatedDoctorData = await this._doctorService.updateDoctor(doctorId, updatedData);
       if (!updatedDoctorData) {
         logger.warn(`Doctor not found for update: ${doctorId}`);
-        res.status(HttpStatus.NOT_FOUND).json(errorResponse("Doctor not found"));
+        res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
         return;
       }
 
       logger.info(`Doctor updated successfully: ${doctorId}`);
-      res.status(HttpStatus.OK).json(successResponse("Doctor updated successfully", updatedDoctorData));
+      res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, updatedDoctorData));
     } catch (error: any) {
       logger.error("Error updating doctor", {
         doctorId: req.params.id,
         error: error.message,
         stack: error.stack
       });
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(error.message));
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
     }
   }
 
@@ -138,7 +139,7 @@ class DocRegController {
       const updateData = await this._doctorService.toggleDoctorApproval(doctorId);
       if (!updateData) {
         logger.warn(`Doctor not found for approval toggle: ${doctorId}`);
-        res.status(HttpStatus.NOT_FOUND).json(errorResponse("Doctor not found"));
+        res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
         return;
       }
 
@@ -152,7 +153,7 @@ class DocRegController {
         error: error.message,
         stack: error.stack
       });
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(error.message));
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
     }
   }
 
@@ -169,7 +170,7 @@ class DocRegController {
       const { patients, total } = await this._doctorService.getPatient(page, limit);
       
       logger.debug(`Fetched ${patients.length} patients out of ${total}`);
-      res.status(HttpStatus.OK).json(successResponse("Patients fetched successfully", {
+      res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, {
         data: patients,
         meta: {
           total,
@@ -183,7 +184,7 @@ class DocRegController {
         error: error.message,
         stack: error.stack
       });
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(error.message));
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message));
     }
   }
 }

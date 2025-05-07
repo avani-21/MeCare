@@ -15,7 +15,6 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
   const pathname = usePathname();
   const [doctorId, setDoctorId] = useState<string | null>(null);
 
-  // Ensure localStorage is accessed only on the client side
   useEffect(() => {
     if (typeof window !== "undefined") {
       setDoctorId(localStorage.getItem("doctorId"));
@@ -24,8 +23,10 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
 
   const menuItems = [
     { name: "Dashboard", icon: <Home size={20} />, href: `/doctor/${doctorId}/dashboard` },
-    { name: "Appointment", icon: <Calendar size={20} />, href: "" },
+    { name: "Appointment", icon: <Calendar size={20} />, href: `/doctor/${doctorId}/appointment` },
     { name: "My Profile", icon: <User size={20} />, href: `/doctor/${doctorId}/profile` },
+    { name: "Slot Managment", icon: <User size={20} />, href: `/doctor/${doctorId}/slot_managment` },
+    { name: "Review Book", icon: <ClipboardList size={20} />, href: `/doctor/${doctorId}/reviews` },
     { name: "My Chats", icon: <ClipboardList size={20} />, href: "" },
   ];
 

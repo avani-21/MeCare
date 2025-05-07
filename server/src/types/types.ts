@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 export interface ApiResponse<T>{
     success?:boolean;
     message?:string;
@@ -18,3 +19,35 @@ export const errorResponse=(message?:string,error?:string | object):ApiResponse<
     message,
     error
 })
+
+
+export interface ISlotDTO {
+  doctorId: Types.ObjectId | string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
+  isAvailable: boolean;
+}
+
+
+export interface ICreateAppointmentDTO {
+    patientId: Types.ObjectId;
+    doctorId: Types.ObjectId;
+    slotId: Types.ObjectId;
+    date: Date;
+    startTime: string;
+    endTime: string;
+    status: "booked" | "cancelled" | "pending"; 
+    paymentStatus: "paid" | "unpaid";
+    amount: number;
+  }
+
+  export interface ProfitData{
+    labels:string[];
+    data:number[];
+    total:number;
+  }
+  
+  
+

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { HttpStatus } from "../utils/httptatus";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ const authenticateDoctor = (req: AuthenticatedRequest, res: Response, next: Next
     const authHeader = req.header("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({ error: "Access Denied. No token provided." });
+      res.status(HttpStatus.UNAUTHORIZED).json({ error: "Access Denied. No token provided." });
       return
      }
 
@@ -26,12 +27,13 @@ const authenticateDoctor = (req: AuthenticatedRequest, res: Response, next: Next
     
     jwt.verify(token, secretKey, (err, decoded: any) => {
       if (err) {
-        res.status(401).json({ error: "Access Token Expired. Please refresh your token." });
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: "Access Token Expired. Please refresh your token." });
         return;
       }
 
       if (!decoded || decoded.role !== "doctor") {
-        res.status(403).json({ error: "Forbidden. Unauthorized role." });
+        console.log("role",decoded)
+        res.status(HttpStatus.FORBIDDEN).json({ error: "Forbidden. Unauthorized role." });
         return;
       }
 
@@ -39,7 +41,7 @@ const authenticateDoctor = (req: AuthenticatedRequest, res: Response, next: Next
       next();
     });
   } catch (error) {
-    res.status(400).json({ error: "Invalid token." });
+    res.status(HttpStatus.BAD_REQUEST).json({ error: "Invalid token." });
   }
 };
 
