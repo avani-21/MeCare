@@ -21,7 +21,6 @@ const PatientTable = () => {
 
     try {
       let response = await getPatients();
-      console.log("patient", response);
       if (response) {
         toast.success("Patient data fetched successfully");
       }
@@ -56,7 +55,7 @@ const PatientTable = () => {
       let response = await togglePatientStatus(patientId);
       fetchPatient()
  
-     console.log(response)
+
 
         setPatientData(prevPatients =>
           prevPatients.map(patient =>

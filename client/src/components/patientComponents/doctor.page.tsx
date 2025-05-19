@@ -32,7 +32,6 @@ export default function DoctorsList() {
         experience,
         searchQuery.trim() // Send trimmed search query to backend
       );
-      console.log("Fetched Doctors:", result);
 
       if (result) {
         setDoctorData(result.doctors.data);

@@ -24,7 +24,6 @@ function DoctorDashboard() {
       setData(null)
       setTodayAppointments([])
       const response = await getDashboard(doctorId);
-      console.log(response);
       if (response) {
         setData(response.summary);
         setTodayAppointments(response.todaysAppointment || []);
