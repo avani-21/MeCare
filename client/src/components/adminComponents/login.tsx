@@ -28,9 +28,9 @@ export default function AdminLogin() {
     try {
       setLoading(true)
       let result=await adminLogin(data)
-      console.log(result.success)
+     
       if(result.success){
-        console.log("dfjhdsjf")
+      
         router.push("/admin_dashboard")
       }
     } catch (error:any){

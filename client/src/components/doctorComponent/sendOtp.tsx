@@ -27,7 +27,6 @@ export default function Sendotp() {
     try {
       setLoading(true);
       const response = await sendOtp(email);
-      console.log(response);
       if (response.status === 200) {
         toast.success("Otp sent to your email");
         router.push("/doctor/verify_otp");
@@ -43,7 +42,6 @@ export default function Sendotp() {
   const googleSign = async () => {
     try {
       const result = await signInWithPopup(auth, googlePprovider);
-      console.log(result);
       const user: User = result.user;
 
       const { email } = user;
@@ -55,7 +53,6 @@ export default function Sendotp() {
       }
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Doctor is not registered or approved by admin")
-      console.log(error.message);
     }
   };
 
