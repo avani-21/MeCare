@@ -62,6 +62,14 @@ import { TYPE } from "inversify-express-utils";
 import { DoctorDashboardService } from "../services/doctorDashboard";
 import { IReview } from "../models/reviews/reviewInterface";
 import ReviewModel from "../models/reviews/reviewModel";
+import { IChat } from "../models/chat/chatInterface";
+import ChatModel from "../models/chat/chatModel";
+import { IChatRepository } from "../interfaces/chatRepositort";
+import { ChatReposiorty } from "../repositories/chatrRepository";
+import { IChatService } from "../interfaces/chat.service";
+import { ChatService } from "../services/chatService";
+import { ChatController } from "../controller/chatController";
+
 
 
 const container = new Container();
@@ -73,6 +81,7 @@ container.bind<IDocRegRepo>(TYPES.DoctorRegRepository).to(AdminDoctorRepository)
 container.bind<IDoctorRepo>(TYPES.DoctorRepository).to(DoctorRepository)
 container.bind<SlotRepo>(TYPES.SlotRepository).to(SlotRepository)
 container.bind<IAppointmentRepository>(TYPES.AppointmentRepository).to(AppointmentRepo)
+container.bind<IChatRepository>(TYPES.ChatRepository).to(ChatReposiorty)
 
 // Bind services
 container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
@@ -83,6 +92,8 @@ container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
 container.bind<IAppointmentService>(TYPES.AppointmentService).to(AppointmentService)
 container.bind<IAdminDashboard>(TYPES.AdminDashboardService).to(AdminDashboardService)
 container.bind<IDoctorDashboard>(TYPES.DoctorDashboardService).to(DoctorDashboardService)
+container.bind<IChatService>(TYPES.ChatService).to(ChatService)
+
 
 
 //Bind controllers
@@ -94,6 +105,8 @@ container.bind<DoctorController>(TYPES.DoctorController).to(DoctorController)
 container.bind<SlotController>(TYPES.SlotController).to(SlotController)
 container.bind<AppointmentController>(TYPES.AppointmentController).to(AppointmentController)
 container.bind<DashboardController>(TYPES.AdmindashboardController).to(DashboardController)
+container.bind<ChatController>(TYPES.ChatController).to(ChatController)
+
 
 //model
 
@@ -104,6 +117,7 @@ container.bind<Model<ISlot>>(TYPES.SlotModel).toConstantValue(SlotModel)
 container.bind<Model<IAppointment>>(TYPES.AppointmentModel).toConstantValue(AppointmentModel)
 container.bind<Model<IPrescription>>(TYPES.PrescriptionModel).toConstantValue(PrescriptioModel)
 container.bind<Model<IReview>>(TYPES.ReviewModel).toConstantValue(ReviewModel)
+container.bind<Model<IChat>>(TYPES.ChatModel).toConstantValue(ChatModel)
 
 
 export { container };

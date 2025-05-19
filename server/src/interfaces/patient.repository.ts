@@ -12,4 +12,5 @@ export interface IPatientRepository extends IBaseRepository<IPatient> {
     createReview(reviewData:IReview):Promise<IReview>
     getReview(appointmentId:string):Promise<IReview | null>
     getReviewByDoctorId(doctorId:string):Promise<IReview[] | null>
+    updateReview(reviewId: string, updateData: Partial<IReview>): Promise<IReview | null>
 }

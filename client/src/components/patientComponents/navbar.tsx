@@ -33,7 +33,7 @@ export default  function Navbar() {
           <Link href="/doctors" className="text-gray-800 hover:text-teal-600">
             Doctors
           </Link>
-          <Link href="" className="text-gray-800 hover:text-teal-600">
+          <Link href="/about_us" className="text-gray-800 hover:text-teal-600">
             About Us
           </Link>
         </div>

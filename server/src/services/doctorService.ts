@@ -139,6 +139,7 @@ import logger from "../utils/logger";
       specialization?: string;
       gender?: string;
       experience?: number;
+        searchQuery?: string;
     }
   ): Promise<{ doctors: IDoctor[]; total: number }> {
 

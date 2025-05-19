@@ -1,6 +1,7 @@
 import API from "@/lib/axiosInstane";
-import { ProfitData } from "@/type/admin";
+import { DateRangeParams, ProfitData } from "@/type/admin";
 import { IAppointment } from "@/type/patient";
+import { DateRange } from "react-big-calendar";
 
 const getAllAppointments=async (page:number,limit:number)=>{
   try {
@@ -35,14 +36,26 @@ const getDasshboard=async ()=>{
   } 
 }
 
- const getProfitData=async (range:'weekly' | 'monthly' | 'yearly') =>{
-    try {
-      let response=await API.get(`/admin/profitData?range=${range}`)
-      console.log("dfdjfjhgfgbhbsdhgfbsfgjeyguiergqndh",response)
-      return response.data
-    } catch (error) {
-       console.log("error",error)
+ const getProfitData = async (
+  range: 'weekly' | 'monthly' | 'yearly' | 'custom',
+  startDate?: Date,
+  endDate?: Date
+) => {
+  try {
+
+    let url = `/admin/profitData?range=${range}`;
+ 
+    if (range === 'custom' && startDate && endDate) {
+      url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
     }
- }
+
+    const response = await API.get(url);
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error fetching profit data:', error);
+    throw error;
+  }
+};
 
 export {getAllAppointments,getDasshboard,getProfitData}

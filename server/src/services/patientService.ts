@@ -9,7 +9,7 @@ import { IPatientRepository } from "../interfaces/patient.repository";
 import TYPES from "../di/types";
 import logger from "../utils/logger";
 import cloudinary from "../config/cloudinary.config";
-import { info } from "console";
+import { error, info } from "console";
 import { IReview } from "../models/reviews/reviewInterface";
 
 dotenv.config();
@@ -93,6 +93,11 @@ class PatientService implements IPatientService {
     if (!patient.isVerified) {
       logger.warn(`Unverified patient login attempt: ${email}`);
       throw new Error("Please verify your account via OTP");
+    }
+
+    if(patient.isBlock){
+      logger.warn("Blocked user ty  to attemmpt login");
+      throw new Error("You are Blocked by Admin")
     }
 
     const isValidPassword = await bcrypt.compare(password, patient.password);
@@ -199,6 +204,10 @@ class PatientService implements IPatientService {
 
   async getReviewByDoctorId(doctorId: string): Promise<IReview[] | null> {
     return await this.patientRepository.getReviewByDoctorId(doctorId)
+  }
+
+  async updateReview(reviewId: string, updateData: Partial<IReview>): Promise<IReview | null> {
+    return await this.patientRepository.updateReview(reviewId,updateData)
   }
 
 }

@@ -1,5 +1,5 @@
 import API from "@/lib/axiosInstane";
-import { IPatient, IReview } from "@/type/patient";
+import { IMessage, IPatient, IReview } from "@/type/patient";
 import { IApp } from "@/type/patient";
 
 const getProfile=async ()=>{
@@ -8,6 +8,7 @@ const getProfile=async ()=>{
     console.log("PROOOO:",response)
     return response
  } catch (error) {
+   console.error("Error fetching patient data:", error); 
    throw new Error("Error fetching patient data") 
  } 
 }
@@ -145,4 +146,78 @@ const getReviews=async (doctorId:string)=>{
   }
 }
 
-export {getProfile,appointmentBook,updateProfile,changePassword,getAppointment,checkOut,getAppointmentData,markAsPaid,getPrescription,addReview,getReview,getReviews}
+const updateReview=async(reviewId:string,updatedData:IReview)=>{
+   try {
+     let response=await API.put(`/patient/reviews/${reviewId}`,updatedData)
+     if(response){
+      return response.data.data
+     }
+   } catch (error) {
+      console.log("Error",error)
+   }
+}
+
+const sendMessage=async (messageData:IMessage)=>{
+  try {
+    let response=await API.post(`/patient//send_message`,messageData)
+    console.log(response)
+    return response.data
+  } catch (error) {
+    console.log("Error",error)
+  }
+}
+
+ const getConversation = async (user1Id: string) => {
+  try {
+    const response = await API.get(`/patient/get_conversation/${user1Id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    throw error;
+  }
+};
+
+const getDoctorByPatient=async ()=>{
+  try {
+    const response= await API.get(`/patient/get_doctors`)
+    return response
+  } catch (error) {
+     console.log(error)
+  }
+}
+
+const logOut = async () => {
+  try {
+    const response = await API.post('/patient/logOut') 
+
+    // Remove cookies immediately
+    document.cookie = 'patientToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+
+    return response
+  } catch (error) {
+    console.error('Logout error:', error)
+    return null
+  }
+}
+const getUnredMessageCount = async (receiverId: string): Promise<number> => {
+  try {
+    const response = await API.get(`/patient/get_unread_message_count/${receiverId}`);
+    return response?.data?.data || 0;
+  } catch (error) {
+    console.error('Error fetching unread message count:', error);
+    throw error;
+  }
+};
+
+const getMessageMark = async (receiverId: string): Promise<any> => {
+  try {
+    const response = await API.put(`/patient/mark_read/${receiverId}`, {});
+    return response?.data?.data;
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
+    throw error;
+  }
+};
+
+
+export {getProfile,appointmentBook,updateProfile,changePassword,getAppointment,checkOut,getAppointmentData,markAsPaid,getPrescription,addReview,getReview,getReviews,getConversation,sendMessage,getDoctorByPatient,logOut,getUnredMessageCount,getMessageMark,updateReview}

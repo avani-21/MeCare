@@ -56,6 +56,10 @@ router.get("/patients", authenticateAdmin, async (req: Request, res: Response) =
   await adminDoctorController.getAllPatients(req, res);
 });
 
+router.put('/toggle_status/:id',async (req:Request,res:Response)=>{
+  await adminController.togglePatientBlockStatus(req,res)
+})
+
 router.get("/appointments",authenticateAdmin,async (req:Request,res:Response)=>{
   await appointmentController.getAllAppointments(req,res)
 })
@@ -66,6 +70,10 @@ router.get("/dashboard",authenticateAdmin,async (req:Request,res:Response)=>{
 
 router.get('/profitData',authenticateAdmin,async (req:Request,res:Response)=>{
   await admindashboardController.getProfitDataForAdmin(req,res)
+})
+
+router.post('/logout',async (req:Request,res:Response)=>{
+  adminController.logOut(req,res)
 })
 
 export default router;

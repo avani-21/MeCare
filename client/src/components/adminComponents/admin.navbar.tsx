@@ -4,9 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../../public/logo.png"
 import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { logOut } from "@/lib/api/admin/login";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  let router=useRouter()
+
+ const handleLogout=async ()=>{
+     let response=await logOut()
+          router.replace("/admin_login")
+ }
 
 
   return (
@@ -21,7 +29,7 @@ export default function Navbar() {
 
         {/* Login Button */}
         <div className="hidden md:block">
-          <Link href="/login" className="bg-teal-600 text-white px-6 py-2 mr-12 rounded-full hover:bg-teal-700">
+          <Link href="/login" className="bg-teal-600 text-white px-6 py-2 mr-12 rounded-full hover:bg-teal-700" onClick={handleLogout}>
             Logout
           </Link>
         </div>

@@ -113,17 +113,29 @@ export class AppointmentController{
         }
     }
 
-    async getDoctorAppointment(req:Request,res:Response){
+    async getDoctorAppointment(req:AuthenticatedRequest,res:Response){
         try {
-            const doctorId=req.params.id;
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 10;
+   const doctorId = req.user?.id;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const status = req.query.status as string || 'all';
+        const startDate = req.query.startDate as string;
+        const endDate = req.query.endDate as string;
+        const searchQuery=req.query.searchQuery as string
 
-            if(!doctorId){
-                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.BAD_REQUEST))  
-            }
+        if (!doctorId) {
+            return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.BAD_REQUEST));
+        }
+
             
-            let response=await this._appointmentService.getDoctorAppointments(doctorId,page,limit)
+            let response=await this._appointmentService.getDoctorAppointment(  doctorId,
+            page,
+            limit,
+            status,
+            startDate,
+            endDate,
+            searchQuery?.trim()
+            );
             return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,response))
         } catch (error) {
                 return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
@@ -171,37 +183,71 @@ export class AppointmentController{
         }
     }
 
-    async createPrescription(req: Request, res: Response) {
-        try {
+    // async createPrescription(req: Request, res: Response) {
+    //     try {
 
-            console.log(req.body);
+    //         console.log(req.body);
             
-            const medicationsArray = req.body.medications
-                .split(/[\n,]/)
-                .map((med: string) => med.trim())
-                .filter((med: string) => med.length > 0);
+    //         const medicationsArray = req.body.medications
+    //             .split(/[\n,]/)
+    //             .map((med: string) => med.trim())
+    //             .filter((med: string) => med.length > 0);
     
-            const prescriptionData: IPrescription = {
-                appointmentId: req.body.appointmentId,
-                doctorId: req.params.id,
-                patientId: req.body.patientId,
-                diagnosis: req.body.diagnosis,
-                medications: medicationsArray, 
-                instructions: req.body.instructions,
-            };
+    //         const prescriptionData: IPrescription = {
+    //             appointmentId: req.body.appointmentId,
+    //             doctorId: req.params.id,
+    //             patientId: req.body.patientId,
+    //             diagnosis: req.body.diagnosis,
+    //             medications: medicationsArray, 
+    //             instructions: req.body.instructions,
+    //         };
     
-            let response = await this._appointmentService.createPrescription(prescriptionData);
-            if (response) {
-                logger.info("Prescription created successfully");
-                return res.status(HttpStatus.CREATED).json(
-                    successResponse(StatusMessages.CREATED, response)
-                );
-            }
-        } catch (error: any) {
-            logger.error("Error adding prescription", error);
-            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
-                errorResponse(StatusMessages.INTERNAL_SERVER_ERROR, error.message)
-            );
+    //         let response = await this._appointmentService.createPrescription(prescriptionData);
+    //         if (response) {
+    //             logger.info("Prescription created successfully");
+    //             return res.status(HttpStatus.CREATED).json(
+    //                 successResponse(StatusMessages.CREATED, response)
+    //             );
+    //         }
+    //     } catch (error: any) {
+    //         logger.error("Error adding prescription", error);
+    //         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+    //             errorResponse(StatusMessages.INTERNAL_SERVER_ERROR, error.message)
+    //         );
+    //     }
+    // }
+
+    async createPrescription(req:Request,res:Response){
+        try {
+             const {appointmentId,patientId,diagnosis,instructions,medications}=req.body
+             const doctorId=req.params.id
+
+             if(!Array.isArray(medications)){
+                throw new Error("Medication must be an array of object")
+             }
+
+             for(const med of medications){
+                if(!med.frequency || !med.name || !med.dosage || !med.duration){
+                    throw new Error("Each medication  must have a name,duration,frequency,and dosage")
+                }
+             }
+             const prescriptionData:IPrescription={
+                appointmentId,
+                doctorId,
+                patientId,
+                diagnosis,
+                medications,
+                instructions
+             }
+
+             const response=await this._appointmentService.createPrescription(prescriptionData)
+             if(response){
+               logger.info("Prescription created successfully") 
+               return res.status(HttpStatus.CREATED).json(successResponse(StatusMessages.CREATED,response)) 
+             }
+        } catch (error:any) {
+            logger.error("Error adding  prescription")
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error.message))
         }
     }
 
@@ -219,5 +265,48 @@ export class AppointmentController{
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error))
         }
     }
+
+    async getDoctorByPatient(req: AuthenticatedRequest, res: Response) {
+        try {
+          const patientId = req.user?.id;
+          if (!patientId) {
+            logger.warn("Patient id is missing");
+            return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT));
+          }
+          
+          let response = await this._appointmentService.getDoctorByPatient(patientId);
+          if (response) {
+            logger.info("Doctors data fetched successfully");
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, response));
+          }
+          
+          return res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
+          
+        } catch (error: any) {
+          logger.error("Internal server error", error);
+          return res.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR, error));
+        }
+      }
+
+
+      async getPatientsByDoctors(req:AuthenticatedRequest,res:Response){
+        try {
+            let doctorId=req.user?.id
+            if(!doctorId){
+                logger.warn("Doctor is  missing in the request")
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT))
+            }
+            let response=await this._appointmentService.getPatientsByDoctors(doctorId)
+            if(response){
+                logger.info("patient data fetched successfully");
+                return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,response))
+            }
+            return res.status(HttpStatus.NOT_FOUND).json(errorResponse(StatusMessages.NOT_FOUND));
+        } catch (error:any) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error))  
+        }
+      }
+
    
 }

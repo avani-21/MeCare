@@ -35,6 +35,7 @@ export interface ICreateAppointmentDTO {
     patientId: Types.ObjectId;
     doctorId: Types.ObjectId;
     slotId: Types.ObjectId;
+    appointmentId?:string;
     date: Date;
     startTime: string;
     endTime: string;

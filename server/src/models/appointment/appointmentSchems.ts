@@ -9,6 +9,9 @@ const AppointmentSchema=new Schema<IAppointment>(
             ref:"Slot",
             required:true,
         },
+        appointmentId:{
+         type:String,
+        },
         doctorId:{
             type: mongoose.Schema.Types.ObjectId, 
             ref:"Doctor",
@@ -44,7 +47,15 @@ const AppointmentSchema=new Schema<IAppointment>(
           amount:{
             type:Number,
             default:120
-          }
+          },
+         reviewId:{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref:"Review",
+        },
+         prescriptionId:{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref:"Prescription",
+        },
     },
     {timestamps:true}
 )

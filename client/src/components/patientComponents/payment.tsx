@@ -99,7 +99,7 @@ export default function ConfirmBooking() {
 
               <label htmlFor="razorpay" className="flex items-center">
                 {/* <Image src="/razorpay.svg" alt="Razorpay" width={80} height={30} /> */}
-                Strip
+                Stripe
               </label>
             </div>
 

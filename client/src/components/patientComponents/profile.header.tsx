@@ -2,12 +2,17 @@
 import { getProfile } from "@/lib/api/patient/patient";
 import { IPatient } from "@/type/patient";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { cookies } from "next/headers";
 
 const ProfileHeader = () => {
   const [patientData, setPatientData] = useState<IPatient | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router=useRouter()
+
 
   const fetchPatientData = async () => {
     try {
@@ -26,9 +31,15 @@ const ProfileHeader = () => {
   };
 
   useEffect(() => {
+     const token = Cookies.get("patientToken");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
     fetchPatientData();
-  }, []);
+  }, [router]);
 
+   
   // if (loading) {
   //   return (
   //     <div className="flex justify-center">
@@ -43,7 +54,11 @@ const ProfileHeader = () => {
   //   );
   // }
 
- 
+ useEffect(()=>{
+  if(patientData?.isBlock){
+    document.cookie = 'patientToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  }
+ },[])
 
   return (
     <div className="flex justify-center">

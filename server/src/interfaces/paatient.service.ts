@@ -29,4 +29,5 @@ export interface IPatientService {
     createReview(reviewData:IReview):Promise<IReview>
     getReviewByAppointment(appointmentId:string):Promise<IReview | null>
     getReviewByDoctorId(doctorId:string):Promise<IReview[] | null>
+    updateReview(reviewId: string, updateData: Partial<IReview>): Promise<IReview | null>
 }

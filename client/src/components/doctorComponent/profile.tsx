@@ -70,7 +70,7 @@ const DoctorProfile = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("id",doctorId)
+    
     try {
       setLoading(true);
       const formData = new FormData();
@@ -106,8 +106,6 @@ const DoctorProfile = () => {
   const fetchData = async () => {
     try {
       let result = await getDoctor();
-      console.log(result)
-      console.log("data id",result._id)
       setDoctorId(result._id || "");
       setDoctorData({
         fullName: result.fullName || "",
@@ -133,6 +131,7 @@ const DoctorProfile = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
@@ -162,7 +161,7 @@ const DoctorProfile = () => {
           <input
             type="text"
             name="fullName"
-            value={doctorData.fullName || ""}
+            value={doctorData.fullName || "Gen"}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             required
@@ -179,10 +178,10 @@ const DoctorProfile = () => {
             required
           >
             <option value="">Select Speciality</option>
-            <option value="General Physician">General Physician</option>
-            <option value="Cardiologist">Cardiologist</option>
+            <option value="General physician">General physician</option>
+            <option value="Gynacologist">Gynacologist</option>
+            <option value="Pediatrition">Pediatrition</option>
             <option value="Neurologist">Neurologist</option>
-            <option value="Gynecologist">Gynecologist</option>
           </select>
         </div>
 

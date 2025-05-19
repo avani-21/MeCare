@@ -110,7 +110,7 @@ function DoctorAppointment() {
     {currentAppointments.map((appointment) => (
       <tr key={appointment._id} className="border-b border-gray-200 hover:bg-gray-50 align-top">
         <td className="px-4 py-4 font-medium text-gray-700 whitespace-nowrap">
-          #{appointment._id.slice(14)}
+          {appointment.appointmentId}
         </td>
 
         <td className="px-4 py-4 whitespace-nowrap">

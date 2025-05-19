@@ -19,7 +19,8 @@ export function middleware(request: NextRequest) {
     "/doctors/:id", 
     "/appointment_booking",
     "/profile/my_appointments",
-    "/profile/manag_account" 
+    "/profile/manag_account" ,
+    "/profile/message"
   ];
 
   const publicRoutes = ["/", "/doctors"];

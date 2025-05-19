@@ -1,34 +1,37 @@
 import API from "@/lib/axiosInstane";
+
+
 const getDoctors = async (
-    page: number,
-    limit: number = 3,
-    specialization: string, // Corrected the spelling to match backend
-    gender: string,
-    experience: number // Corrected the spelling to match backend
-  ) => {
-    try {
-      const response = await API.get("/patient/doctors", {
-        params: {
-          page,
-          limit,
-          specialization, 
-          gender,
-          experience 
-        }
-      });
-  
-      console.log("Doctor data:", response.data.data);
-      console.log("Total:", response.data.data.meta.total);
-  
-      return {
-        doctors: response.data.data,
-        total: response.data.data.meta.total
-      };
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || error.message);
-    }
-  };
-  
+  page: number,
+  limit: number = 3,
+  specialization?: string,
+  gender?: string,
+  experience?: number,
+  searchQuery?: string
+) => {
+  try {
+    const response = await API.get("/patient/doctors", {
+      params: {
+        page,
+        limit,
+        ...(specialization && { specialization }), 
+        ...(gender && { gender }),
+        ...(experience && { experience }),
+        ...(searchQuery && { searchQuery }) 
+      }
+    });
+
+    console.log("Doctor data:", response.data.data);
+    console.log("Total:", response.data.data.meta.total);
+
+    return {
+      doctors: response.data.data,
+      total: response.data.data.meta.total
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || error.message);
+  }
+};  
 
 const getSingleDoctor=async (id:string)=>{
     try {

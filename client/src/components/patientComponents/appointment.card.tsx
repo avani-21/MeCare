@@ -2,11 +2,18 @@
 import { IAppointment, IReview } from "@/type/patient";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { addReview, getAppointmentData, getReview } from "@/lib/api/patient/patient";
+import { addReview, getAppointmentData, getReview, updateReview } from "@/lib/api/patient/patient";
 import { getPrescription } from "@/lib/api/patient/doctors";
 import { PrescriptionTemplate } from "@/components/patientComponents/prescription";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { toast } from "sonner";
+
+interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
 
 export default function AppointmentCard() {
   const [appointmentData, setAppointmentData] = useState<IAppointment[]>([]);
@@ -17,24 +24,22 @@ export default function AppointmentCard() {
   const [prescriptionData, setPrescriptionData] = useState<any>(null);
   const [loadingPrescription, setLoadingPrescription] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-const [selectedAppointment, setSelectedAppointment] = useState<IAppointment | null>(null);
-const [rating, setRating] = useState<number>(0);
-const [reviewText, setReviewText] = useState<string>("");
-const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<IAppointment | null>(null);
+  const [rating, setRating] = useState<number>(0);
+  const [reviewText, setReviewText] = useState<string>("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isViewReviewModalOpen, setIsViewReviewModalOpen] = useState(false);
-const [existingReview, setExistingReview] = useState<IReview | null>(null);
-const [isEditingReview, setIsEditingReview] = useState(false);
-
+  const [existingReview, setExistingReview] = useState<IReview | null>(null);
+  const [isEditReviewModalOpen, setIsEditReviewModalOpen] = useState(false);
 
   const fetchAppointment = async () => {
     try {
       setLoading(true);
       setError(null);
       let response = await getAppointmentData(currentPage, itemsPerPage, filterStatus);
-      
+
       if (response?.data?.data) {
         setAppointmentData(response.data.data.appointment);
         setTotalAppointments(response.data.data.total);
@@ -52,18 +57,16 @@ const [isEditingReview, setIsEditingReview] = useState(false);
       setLoadingPrescription(true);
       const response = await getPrescription(appointmentId);
       const actualPrescription = response[0];
-      
+
       if (actualPrescription) {
-        setPrescriptionData({
-          ...actualPrescription,
-          medications: Array.isArray(actualPrescription.medications)
-            ? actualPrescription.medications.join('\n')
-            : actualPrescription.medications
-        });
+        setPrescriptionData(actualPrescription);
         setIsModalOpen(true);
+      } else {
+        toast.info("No prescription found for this appointment");
       }
     } catch (error) {
       console.error("Error fetching prescription data:", error);
+      toast.error("Failed to fetch prescription");
     } finally {
       setLoadingPrescription(false);
     }
@@ -75,77 +78,100 @@ const [isEditingReview, setIsEditingReview] = useState(false);
     setCurrentPage(pageNumber);
   };
 
-
-  const handleReviewAdding = async () => {
-    if (!selectedAppointment || !selectedAppointment._id || rating === 0)  {
-      toast.error('Please select a rating');
+  const handleAddReview = async () => {
+    if (!selectedAppointment || !selectedAppointment._id || rating === 0) {
+      toast.error("Please select a rating");
       return;
     }
-  
+
     try {
       setIsSubmittingReview(true);
-      
-      const doctorId = typeof selectedAppointment.doctorId === "string" 
-        ? selectedAppointment.doctorId 
-        : selectedAppointment.doctorId?._id;
-  
+
+      const doctorId =
+        typeof selectedAppointment.doctorId === "string"
+          ? selectedAppointment.doctorId
+          : selectedAppointment.doctorId?._id;
+
       if (!doctorId) {
         throw new Error("Doctor ID not found");
       }
-  
+
       const reviewData: IReview = {
-        doctorId:selectedAppointment.doctorId?._id,
-        patientId: selectedAppointment.patientId, 
+        doctorId: selectedAppointment.doctorId?._id,
+        patientId: selectedAppointment.patientId,
         appointmentId: selectedAppointment._id,
         ratings: rating,
-        comment: reviewText
+        comment: reviewText,
       };
-  
+
       const response = await addReview(reviewData);
-      
+
       if (response) {
-        toast.success('Review submitted successfully!');
+        toast.success("Review submitted successfully!");
         setIsReviewModalOpen(false);
         setRating(0);
         setReviewText("");
+        fetchAppointment();
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
-      toast.error('Failed to submit review');
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review");
     } finally {
       setIsSubmittingReview(false);
     }
   };
 
-
-const fetchReview = async () => {
-  let appointmentId=selectedAppointment?._id
-
-  if (!appointmentId) {
-   console.log("Appointment ID is missing");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const response = await getReview(appointmentId);
-    if (response) {
-      setExistingReview(response);
-      setIsViewReviewModalOpen(true);
-    } else {
-      console.log("No review found for appointment:", appointmentId);
-      setIsViewReviewModalOpen(false);
-      setIsReviewModalOpen(true);
+  const handleEditReview = async () => {
+    if (!existingReview?._id || rating === 0) {
+      toast.error("Please select a rating");
+      return;
     }
-  } catch (error) {
-    console.error("Error fetching review for appointment:", appointmentId, error);
-    toast.error("Failed to fetch review");
-  } finally {
-    setLoading(false);
-  }
-};
 
+    try {
+      setIsSubmittingReview(true);
+      const response = await updateReview(existingReview._id, {
+        ratings: rating,
+        comment: reviewText,
+      });
+
+      if (response) {
+        toast.success("Review updated successfully!");
+        setIsEditReviewModalOpen(false);
+        setExistingReview(response);
+        fetchAppointment();
+      }
+    } catch (error) {
+      console.error("Error updating review:", error);
+      toast.error("Failed to update review");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const fetchReview = async () => {
+    if (!selectedAppointment?._id) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await getReview(selectedAppointment._id);
+      if (response) {
+        setExistingReview(response);
+        setRating(response.ratings);
+        setReviewText(response.comment || "");
+        setIsEditReviewModalOpen(true);
+      } else {
+        console.log("No review found for appointment:", selectedAppointment._id);
+        setIsReviewModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching review:", error);
+      toast.error("Failed to fetch review");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAppointment();
@@ -171,7 +197,6 @@ const fetchReview = async () => {
             <option value="all">All Appointments</option>
             <option value="booked">Booked</option>
             <option value="completed">Completed</option>
-            {/* <option value="cancelled">Cancelled</option> */}
           </select>
         </div>
       </div>
@@ -297,30 +322,32 @@ const fetchReview = async () => {
                   </div>
                 </div>
 
-
-{appointment.status === "completed" && (
- <>
-  <button
-    onClick={() => {
-      setSelectedAppointment(appointment);
-      setIsReviewModalOpen(true);
-    }}
-    className="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded text-sm disabled:opacity-50 ml-2"
-  >
-    Add Review
-  </button>
-
-    <button
-      onClick={() => {
-        setSelectedAppointment(appointment);
-        fetchReview();
-      }}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm ml-2"
-    >
-      Show Review
-    </button>
- </>
-)}
+                {/* Review Button */}
+                {appointment.status === "completed" && (
+                  <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
+                    {appointment.reviewId ? (
+                      <button
+                        onClick={() => {
+                          setSelectedAppointment(appointment);
+                          fetchReview();
+                        }}
+                        className="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded text-sm"
+                      >
+                        Edit Review
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedAppointment(appointment);
+                          setIsReviewModalOpen(true);
+                        }}
+                        className="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded text-sm"
+                      >
+                        Add Review
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           ) : (
@@ -332,16 +359,113 @@ const fetchReview = async () => {
       )}
 
       {/* Prescription Modal */}
-      {isModalOpen && (
+      {isModalOpen && prescriptionData && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-gray-100 rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Prescription Details</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">
+                Patient: {prescriptionData.patientId?.name || "N/A"}
+              </label>
+              <label className="block text-gray-700 mb-2">
+                Doctor: {prescriptionData.doctorId?.fullName || "N/A"}
+              </label>
+              <label className="block text-gray-700 mb-2">
+                Date: {new Date(prescriptionData.createdAt).toLocaleDateString()}
+              </label>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-semibold">Diagnosis</label>
+              <div className="w-full px-3 py-2 border rounded-lg bg-gray-50">
+                {prescriptionData.diagnosis || "N/A"}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-semibold">Medications</label>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border">
+                  <thead>
+                    <tr className="bg-teal-700 text-white">
+                      <th className="px-4 py-2 text-left">Name</th>
+                      <th className="px-4 py-2 text-left">Dosage</th>
+                      <th className="px-4 py-2 text-left">Frequency</th>
+                      <th className="px-4 py-2 text-left">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prescriptionData.medications && prescriptionData.medications.length > 0 ? (
+                      prescriptionData.medications.map((med: Medication, index: number) => (
+                        <tr key={index} className="border-b">
+                          <td className="px-4 py-2">{med.name || "N/A"}</td>
+                          <td className="px-4 py-2">{med.dosage || "N/A"}</td>
+                          <td className="px-4 py-2">{med.frequency || "N/A"}</td>
+                          <td className="px-4 py-2">{med.duration || "N/A"}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-2 text-center">
+                          No medications specified
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-semibold">Instructions</label>
+              <div className="w-full px-3 py-2 border rounded-lg bg-gray-50 whitespace-pre-line">
+                {prescriptionData.instructions || "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <PDFDownloadLink
+                document={<PrescriptionTemplate prescription={prescriptionData} />}
+                fileName={`prescription-${prescriptionData?.patientId?._id || "patient"}.pdf`}
+              >
+                {({ loading }) => (
+                  <button
+                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md transition duration-300"
+                    disabled={loading}
+                  >
+                    {loading ? "Generating PDF..." : "Download Prescription"}
+                  </button>
+                )}
+              </PDFDownloadLink>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Review Modal */}
+      {isReviewModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">
-                  Prescription Details
+                  Add Review for Dr.{" "}
+                  {typeof selectedAppointment?.doctorId !== "string"
+                    ? selectedAppointment?.doctorId?.fullName
+                    : "Doctor"}
                 </h3>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsReviewModalOpen(false);
+                    setRating(0);
+                    setReviewText("");
+                  }}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <svg
@@ -361,314 +485,171 @@ const fetchReview = async () => {
                 </button>
               </div>
 
-              {loadingPrescription ? (
-                <p>Loading prescription...</p>
-              ) : prescriptionData ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium text-gray-700">Patient Name:</h4>
-                      <p>{prescriptionData.patientId?.name || "N/A"}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">Doctor Name:</h4>
-                      <p>{prescriptionData.doctorId?.fullName || "N/A"}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-gray-700">Diagnosis:</h4>
-                    <p>{prescriptionData.diagnosis || "N/A"}</p>
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Medications</label>
-                    <textarea
-                      value={prescriptionData.medications || ""}
-                      readOnly
-                      className="w-full px-3 py-2 border rounded-lg bg-gray-50"
-                      rows={4}
-                    />
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-gray-700">Instructions:</h4>
-                    <p>{prescriptionData.instructions || "N/A"}</p>
-                  </div>
-
-                  <div className="flex justify-end mt-4">
-                    <PDFDownloadLink
-                      document={<PrescriptionTemplate prescription={prescriptionData} />}
-                      fileName={`prescription-${prescriptionData?.patientId?._id || 'patient'}.pdf`}
-                    >
-                      {({ loading }) => (
-                        <button
-                          className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md transition duration-300"
-                          disabled={loading}
+              <div className="space-y-4">
+                {/* Star Rating */}
+                <div>
+                  <label className="block text-gray-700 mb-2">Rating</label>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none"
+                      >
+                        <svg
+                          className={`w-8 h-8 ${star <= rating ? "text-yellow-400" : "text-gray-300"}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
                         >
-                          {loading ? 'Generating PDF...' : 'Download Prescription'}
-                        </button>
-                      )}
-                    </PDFDownloadLink>
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ) : (
-                <p>No prescription data available</p>
-              )}
+
+                {/* Review Text */}
+                <div>
+                  <label htmlFor="review-text" className="block text-gray-700 mb-2">
+                    Your Review
+                  </label>
+                  <textarea
+                    id="review-text"
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    rows={4}
+                    placeholder="Share your experience..."
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end space-x-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setIsReviewModalOpen(false);
+                      setRating(0);
+                      setReviewText("");
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddReview}
+                    disabled={isSubmittingReview}
+                    className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-{/* Review Modal */}
-{isReviewModalOpen && (
-  <div className="fixed inset-0 flex items-center justify-center p-4 z-50 ">
-    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-800">
-            Add Review for Dr. {
-              typeof selectedAppointment?.doctorId !== "string" 
-                ? selectedAppointment?.doctorId?.fullName 
-                : "Doctor"
-            }
-          </h3>
-          <button
-            onClick={() => {
-              setIsReviewModalOpen(false);
-              setRating(0);
-              setReviewText("");
-            }}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {/* Star Rating */}
-          <div>
-            <label className="block text-gray-700 mb-2">Rating</label>
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
+      {/* Edit Review Modal */}
+      {isEditReviewModalOpen && existingReview && (
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-800">
+                  Edit Your Review for Dr.{" "}
+                  {typeof selectedAppointment?.doctorId !== "string"
+                    ? selectedAppointment?.doctorId?.fullName
+                    : "Doctor"}
+                </h3>
                 <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="focus:outline-none"
+                  onClick={() => {
+                    setIsEditReviewModalOpen(false);
+                    setRating(existingReview.ratings);
+                    setReviewText(existingReview.comment || "");
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
                 >
                   <svg
-                    className={`w-8 h-8 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Review Text */}
-          <div>
-            <label htmlFor="review-text" className="block text-gray-700 mb-2">
-              Your Review
-            </label>
-            <textarea
-              id="review-text"
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              rows={4}
-              placeholder="Share your experience..."
-            />
-          </div>
+              <div className="space-y-4">
+                {/* Star Rating */}
+                <div>
+                  <label className="block text-gray-700 mb-2">Rating</label>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none"
+                      >
+                        <svg
+                          className={`w-8 h-8 ${star <= rating ? "text-yellow-400" : "text-gray-300"}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-3 pt-2">
-            <button
-              onClick={() => {
-                setIsReviewModalOpen(false);
-                setRating(0);
-                setReviewText("");
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleReviewAdding}
-              disabled={isSubmittingReview}
-              className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
-            >
-              {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                {/* Review Text */}
+                <div>
+                  <label htmlFor="edit-review-text" className="block text-gray-700 mb-2">
+                    Your Review
+                  </label>
+                  <textarea
+                    id="edit-review-text"
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    rows={4}
+                    placeholder="Share your experience..."
+                  />
+                </div>
 
-{/* View Review Modal */}
-{isViewReviewModalOpen && existingReview && (
-  <div className="fixed inset-0 flex items-center justify-center p-4 z-50 b">
-    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-800">
-            Your Review for Dr. {
-              typeof selectedAppointment?.doctorId !== "string" 
-                ? selectedAppointment?.doctorId?.fullName 
-                : "Doctor"
-            }
-          </h3>
-          <button
-            onClick={() => {
-              setIsViewReviewModalOpen(false);
-              setIsEditingReview(false);
-            }}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {isEditingReview ? (
-          <div className="space-y-4">
-            {/* Star Rating */}
-            <div>
-              <label className="block text-gray-700 mb-2">Rating</label>
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-2">
                   <button
-                    key={star}
-                    onClick={() => setRating(star)}
-                    className="focus:outline-none"
+                    onClick={() => {
+                      setIsEditReviewModalOpen(false);
+                      setRating(existingReview.ratings);
+                      setReviewText(existingReview.comment || "");
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
-                    <svg
-                      className={`w-8 h-8 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
+                    Cancel
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Review Text */}
-            <div>
-              <label htmlFor="review-text" className="block text-gray-700 mb-2">
-                Your Review
-              </label>
-              <textarea
-                id="review-text"
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                rows={4}
-                placeholder="Share your experience..."
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-3 pt-2">
-              <button
-                onClick={() => {
-                  setIsEditingReview(false);
-                  setRating(existingReview.ratings);
-                  setReviewText(existingReview.comment || "");
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReviewAdding}
-                disabled={isSubmittingReview}
-                className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
-              >
-                {isSubmittingReview ? 'Updating...' : 'Update Review'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Star Rating Display */}
-            <div>
-              <label className="block text-gray-700 mb-2">Rating</label>
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    className={`w-6 h-6 ${star <= existingReview.ratings ? 'text-yellow-400' : 'text-gray-300'}`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                  <button
+                    onClick={handleEditReview}
+                    disabled={isSubmittingReview}
+                    className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
                   >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+                    {isSubmittingReview ? "Updating..." : "Update Review"}
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* Review Text Display */}
-            <div>
-            <textarea
-                id="review-text"
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                rows={4}
-                placeholder="Share your experience..."
-              />
-            </div>
-
-            {/* Edit Button */}
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => {
-                  setIsEditingReview(true);
-                  setRating(existingReview.ratings);
-                  setReviewText(existingReview.comment || "");
-                }}
-                className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Edit Review
-              </button>
-            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+        </div>
+      )}
+
       {/* Pagination */}
       {!loading && !error && totalAppointments > 0 && (
         <div className="flex justify-center mt-4">

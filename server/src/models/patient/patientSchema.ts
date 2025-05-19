@@ -49,6 +49,10 @@ const patientSchema=new Schema<IPatient>(
         dob:{
             type:Date
         },
+        isBlock:{
+            type:Boolean,
+            default:false
+        },
         age:{
             type:Number
         },

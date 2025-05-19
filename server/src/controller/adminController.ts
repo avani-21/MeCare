@@ -8,6 +8,7 @@ import { HttpStatus } from "../utils/httptatus";
 import { errorResponse, successResponse } from "../types/types";
 import logger from "../utils/logger";
 import { StatusMessages } from "../utils/message";
+import { AuthenticatedRequest } from "../middleware/patientAuthMiddleware";
 
 
 @injectable()
@@ -47,8 +48,6 @@ export class AdminController {
             res.status(HttpStatus.UNAUTHORIZED).json(errorResponse(StatusMessages.UNAUTHORIZED,error.message));
         }
     }
-
-
 
     async refreshToken(req: Request, res: Response): Promise<any> {
         try {
@@ -93,6 +92,38 @@ export class AdminController {
                 });
             }
             return res.status(HttpStatus.FORBIDDEN).json({ error: "Invalid token." });
+        }
+    }
+
+      async logOut(req:Request,res:Response){
+        try {
+            res.clearCookie("patientToken",{
+                httpOnly:true,
+                secure:false,
+                sameSite:"none"
+            })
+            logger.info("JWT cleared from cooki successfully")
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK))
+        } catch (error) {
+             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    async togglePatientBlockStatus(req:Request,res:Response){
+        try {
+            let patientId=req.params.id
+            if(!patientId){
+                logger.warn("Patient id is missing")
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT))
+            }
+            let response=await this._adminService.togglePatientStatus(patientId)
+            if(response){
+                logger.info("Status changged successfully")
+                return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK))
+            }
+        } catch (error) {
+            logger.warn("Error occured during the patient status toggle")
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
         }
     }
 }

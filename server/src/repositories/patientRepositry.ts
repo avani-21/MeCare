@@ -7,6 +7,7 @@ import { Model, Types } from "mongoose"; // Import Model
 import  TYPES  from "../di/types"; // Import your types file
 import { IReview } from "../models/reviews/reviewInterface";
 import ReviewModel from "../models/reviews/reviewModel";
+import AppointmentModel from "../models/appointment/appointmentModel";
 
 @injectable()
 export class PatientRepository extends BaseRepository<IPatient> implements IPatientRepository {
@@ -63,6 +64,12 @@ export class PatientRepository extends BaseRepository<IPatient> implements IPati
           comment:reviewData.comment
         })
 
+        await AppointmentModel.findByIdAndUpdate(
+      reviewData.appointmentId,
+      { reviewId: review._id },
+      { new: true }
+    );
+
         return review
       }
 
@@ -74,5 +81,20 @@ export class PatientRepository extends BaseRepository<IPatient> implements IPati
           let reviews=await ReviewModel.find({doctorId:doctorId}).sort({createdAt:-1}).populate("patientId").exec()
           return reviews
       }
-  
+ 
+    
+async updateReview(reviewId: string, updateData: Partial<IReview>): Promise<IReview | null> {
+    return await ReviewModel.findByIdAndUpdate(
+        reviewId,
+        {
+            $set: {
+                ratings: updateData.ratings,
+                comment: updateData.comment,
+                updatedAt: new Date()
+            }
+        },
+        { new: true } 
+    ).lean();
+}
+
 }

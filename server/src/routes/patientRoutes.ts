@@ -9,6 +9,7 @@ import authenticatePatient from "../middleware/patientAuthMiddleware";
 import { SlotController } from "../controller/slotController";
 import { AppointmentController } from "../controller/appointmentController";
 import upload from "../middleware/multer";
+import { ChatController } from "../controller/chatController";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ const patientController = container.get<PatientAuthController>(TYPES.PatientAuth
 const doctorController=container.get<DoctorController>(TYPES.DoctorController)
 const slotController=container.get<SlotController>(TYPES.SlotController);
 const appointmentController=container.get<AppointmentController>(TYPES.AppointmentController)
+const chatController=container.get<ChatController>(TYPES.ChatController)
 
 // Patient Auth
 router.post("/register", async (req: Request, res: Response) => {
@@ -78,7 +80,7 @@ router.post("/doctor/appointment",authenticatePatient,async (req:Request,res:Res
   await appointmentController.bookAppointment(req,res)
 })
  
-router.get("/doctor/appointment_booking/:id",async (req:Request,res:Response)=>{
+router.get("/doctor/appointment_booking/:id",authenticatePatient,async (req:Request,res:Response)=>{
   await appointmentController.getSingleAppointment(req,res)
 })
 
@@ -95,17 +97,44 @@ router.get("/get_appointment",authenticatePatient,async (req:Request,res:Respons
   await appointmentController.getPatientAppointment(req,res)
 })
 
-router.get("/prescription/:appointmentId",async (req:Request,res:Response)=>{
+router.get("/prescription/:appointmentId",authenticatePatient,async (req:Request,res:Response)=>{
     appointmentController.getPrescription(req,res)
 })
 
-router.post('/review/:doctorId', async (req:Request,res:Response)=>{
+router.post('/review/:doctorId',authenticatePatient ,async (req:Request,res:Response)=>{
    patientController.createReview(req,res)
 })
 
-router.get('/review/:appointmentId',async (req:Request,res:Response)=>{
+router.get('/review/:appointmentId', authenticatePatient,async (req:Request,res:Response)=>{
   patientController.getReview(req,res)
 })
 
+router.put('/reviews/:reviewId',authenticatePatient, async (req:Request,res:Response)=>{
+  patientController.updateReview(req,res)
+})
+
+router.post('/send_message',authenticatePatient,async (req:Request,res:Response)=>{
+    chatController.sendMessage(req,res)
+})
+
+router.get('/get_doctors',authenticatePatient, async (req:Request,res:Response)=>{
+   appointmentController.getDoctorByPatient(req,res)
+})
+
+router.get('/get_conversation/:user1Id',authenticatePatient,async (req:Request,res:Response)=>{
+  chatController.getConversation(req,res)
+})
+
+router.post('/logout',async (req:Request,res:Response)=>{
+  patientController.logOut(req,res)
+})
+
+router.get('/get_unread_message_count/:id',authenticatePatient,async (req:Request,res:Response)=>{
+  chatController.getUnreadMessageCount(req,res)
+})
+
+router.put('/mark_read/:id',authenticatePatient,async (req:Request,res:Response)=>{
+  chatController.markMessageAsRead(req,res)
+})
 
 export default router;

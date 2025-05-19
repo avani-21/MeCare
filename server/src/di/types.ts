@@ -6,6 +6,7 @@
   DoctorRepository:Symbol.for("DoctorRepository"),
   SlotRepository:Symbol.for("SlotRepository"),
   AppointmentRepository:Symbol.for("AppointmentRepository"),
+  ChatRepository:Symbol.for("ChatRepository"),
 
 
 
@@ -17,7 +18,9 @@
   AppointmentService:Symbol.for("AppointmentService"),
   AdminDashboardService:Symbol.for("AdminDashboardService"),
   DoctorDashboardService:Symbol.for("DoctorDashboardService"),
+  ChatService:Symbol.for("ChatService"),
 
+  
   PatientAuthController: Symbol.for("PatientAuthController"),
   DocRegController: Symbol.for("DocRegController"),
   adminController:Symbol.for("adminController"),
@@ -25,6 +28,8 @@
   SlotController:Symbol.for("SlotController"),
   AppointmentController:Symbol.for("AppointmentController"),
   AdmindashboardController:Symbol.for("AdmindashboardController"),
+  ChatController:Symbol.for("ChatController"),
+
 
   PatientModel: Symbol.for("PatientModel"),
   DoctorModel:Symbol.for("DoctorModel"),
@@ -32,7 +37,8 @@
   SlotModel:Symbol.for("SlotModel"),
   AppointmentModel:Symbol.for("AppointmentModel"),
   PrescriptionModel:Symbol.for("Prescription"),
-  ReviewModel:Symbol.for("ReviewModel")
+  ReviewModel:Symbol.for("ReviewModel"),
+  ChatModel:Symbol.for("ChatModel")
 };
 
 export default TYPES

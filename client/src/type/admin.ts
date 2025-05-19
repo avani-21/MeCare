@@ -25,3 +25,8 @@ export interface DashboardData {
   }
   
   
+export interface DateRangeParams {
+  startDate: Date;
+  endDate: Date;
+}
+  

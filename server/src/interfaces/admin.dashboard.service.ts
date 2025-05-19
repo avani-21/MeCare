@@ -12,5 +12,6 @@ export interface IAdminDashboard {
         latestAppointments: IAppointment[];
     }>;
 
-    getProfitData(range: 'weekly' | 'monthly' | 'yearly'): Promise<ProfitData>;
+    getProfitData(range: 'weekly' | 'monthly' | 'yearly' ): Promise<ProfitData>;
+    getCustomProfitData(dateRange: { startDate: Date; endDate: Date }): Promise<ProfitData>;
 }

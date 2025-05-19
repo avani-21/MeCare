@@ -18,9 +18,10 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { profile } from 'console';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
-// Register ChartJS components
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -37,16 +38,17 @@ function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [latestAppointments, setLatestAppointments] = useState<IAppointment[]>([]);
   const [profitData, setProfitData] = useState<ProfitData | null>(null);
-  const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'yearly'>('weekly');
+  const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
   const [loading, setLoading] = useState<boolean>(false);
   const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<Date>(new Date(new Date().setDate(new Date().getDate() - 7)));
+  const [endDate, setEndDate] = useState<Date>(new Date());
   let navigate = useRouter();
 
   const getDashbordData = async () => {
     try {
       setLoading(true);
       const response = await getDasshboard();
-      console.log('dashboard', response?.summary);
       if (response) {
         setData(response.summary);
         setLatestAppointments(response.latestAppointments);
@@ -60,19 +62,31 @@ function Dashboard() {
     }
   };
 
-  const fetchProfitData = async (range: 'weekly' | 'monthly' | 'yearly') => {
-    try {
-      setChartLoading(true);
-      const data = await getProfitData(range);
-      setProfitData(data);
-    } catch (error) {
-      console.error('Error loading profit data:', error);
-      toast.error('Failed to load profit data');
-    } finally {
-      setChartLoading(false);
+const fetchProfitData = async (range: 'weekly' | 'monthly' | 'yearly' | 'custom') => {
+  try {
+    setChartLoading(true);
+    let data: ProfitData;
+    
+    if (range === 'custom') {
+      // For custom range, pass both range and dates
+      data = await getProfitData(
+        'custom',
+        startDate,  // Your existing startDate state
+        endDate     // Your existing endDate state
+      );
+    } else {
+      // For predefined ranges, just pass the range
+      data = await getProfitData(range);
     }
-  };
-
+    
+    setProfitData(data);
+  } catch (error) {
+    console.error('Error loading profit data:', error);
+    toast.error('Failed to load profit data');
+  } finally {
+    setChartLoading(false);
+  }
+};
   useEffect(() => {
     getDashbordData();
     fetchProfitData('weekly');
@@ -82,17 +96,19 @@ function Dashboard() {
     if (timeRange) {
       fetchProfitData(timeRange);
     }
-  }, [timeRange]);
+  }, [timeRange, startDate, endDate]);
 
   const chartOptions = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top' as const, // <-- Add `as const`
+        position: 'top' as const,
       },
       title: {
         display: true,
-        text: `Profit Analysis (${timeRange})`,
+        text: timeRange === 'custom' 
+          ? `Profit Analysis (${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()})`
+          : `Profit Analysis (${timeRange})`,
       },
     },
     elements: {
@@ -117,7 +133,6 @@ function Dashboard() {
     },
   };
 
-  console.log("profile data",profitData?.data.data)
   const chartData = {
     labels: profitData?.data.labels || [],
     datasets: [
@@ -206,7 +221,7 @@ function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium">Profit</p>
-              <h3 className="text-2xl font-bold text-gray-800"> {data.profit}</h3>
+              <h3 className="text-2xl font-bold text-gray-800">₹{data.profit}</h3>
             </div>
             <div className="bg-purple-100 p-3 rounded-full">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +236,7 @@ function Dashboard() {
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">Profit Analysis</h2>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 items-center">
             <button
               onClick={() => setTimeRange('weekly')}
               className={`px-3 py-1 text-sm rounded-md ${timeRange === 'weekly' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
@@ -240,6 +255,55 @@ function Dashboard() {
             >
               Yearly
             </button>
+            <button
+              onClick={() => setTimeRange('custom')}
+              className={`px-3 py-1 text-sm rounded-md ${timeRange === 'custom' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              Custom
+            </button>
+            
+            {timeRange === 'custom' && (
+              <div className="flex space-x-2 ml-2">
+                <div className="border rounded-md px-2 py-1">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date: Date | null) => {
+                      if(date){
+                        setStartDate(date)
+                      }
+                    }}
+                    selectsStart
+                    startDate={startDate}
+                    endDate={endDate}
+                    maxDate={endDate}
+                    className="text-sm w-28"
+                  />
+                </div>
+                <span className="flex items-center">to</span>
+                <div className="border rounded-md px-2 py-1">
+                  <DatePicker
+                    selected={endDate}
+                    onChange={(date: Date | null) =>{
+                      if((date)){
+                        setEndDate((date))
+                      }
+                    }}
+                    selectsEnd
+                    startDate={startDate}
+                    endDate={endDate}
+                    minDate={startDate}
+                    maxDate={new Date()}
+                    className="text-sm w-28"
+                  />
+                </div>
+                <button
+                  onClick={() => fetchProfitData('custom')}
+                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                >
+                  Apply
+                </button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -254,7 +318,8 @@ function Dashboard() {
         )}
       </div>
 
-      {/* Recent Appointments */}
+
+       {/* Recent Appointments */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">Recent Appointments</h2>
@@ -344,7 +409,7 @@ function Dashboard() {
             </tbody>
           </table>
         </div>
-      </div>     
+      </div>   
     </div>
   );
 }

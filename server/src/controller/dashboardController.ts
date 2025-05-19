@@ -48,16 +48,30 @@ export class DashboardController {
         }
     }
 
-    async getProfitDataForAdmin(req:Request,res:Response){
-        try {
-            let range=req.query.range as 'weekly' | 'monthly' | 'yearly' || 'weekly';
-            const data=await this._adminDashboardService.getProfitData(range)
-            logger.info("Profit data fetched successfully")
-            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK,data))
-        } catch (error:any) {
-            logger.error("Error fetching profit data",error)
-             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error))
-        }
-    }
     
+async getProfitDataForAdmin(req: Request, res: Response) {
+  try {
+    const range = req.query.range as 'weekly' | 'monthly' | 'yearly' | 'custom';
+    
+    if (range === 'custom') {
+      const startDate = new Date(req.query.startDate as string);
+      const endDate = new Date(req.query.endDate as string);
+      
+      if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error('Invalid custom date range');
+      }
+      
+      const data = await this._adminDashboardService.getCustomProfitData({ startDate, endDate });
+      return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, data));
+    } else {
+      const data = await this._adminDashboardService.getProfitData(range);
+      return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, data));
+    }
+  } catch (error: any) {
+    logger.error("Error fetching profit data", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+      errorResponse(StatusMessages.INTERNAL_SERVER_ERROR, error)
+    );
+  }
+}
 }

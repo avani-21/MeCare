@@ -10,6 +10,7 @@ import logger from "../utils/logger";
 import { AuthenticatedRequest } from "../middleware/patientAuthMiddleware";
 import { StatusMessages } from "../utils/message";
 import { IReview } from "../models/reviews/reviewInterface";
+import { comment } from "postcss";
 
 
 
@@ -386,6 +387,49 @@ class PatientAuthController {
         } catch (error:any) {
           logger.error("Error ocuuered during review data fetching",error)   
           return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    async logOut(req:Request,res:Response){
+        try {
+            res.clearCookie("accessToken",{
+                httpOnly:true,
+                secure:true,
+                sameSite:"none"
+            })
+            logger.info("JWT cleared from cooki successfully")
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK))
+        } catch (error) {
+             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    async updateReview(req:Request,res:Response){
+        try {
+            const reviewId=req.params.reviewId;
+            const updatedData={
+                ratings:req.body.ratings,
+                comment:req.body.comment
+            }
+
+            if(!reviewId){
+                logger.warn("review id is required")
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT))
+            }
+
+            const response=await this._patientService.updateReview(reviewId,updatedData)
+             if (response) {
+            logger.info("Review updated successfully");
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK, response));
+        } else {
+            logger.info("Review not found");
+            return res.status(HttpStatus.NOT_FOUND).json(
+                errorResponse(StatusMessages.NOT_FOUND, "Review not found")
+            );
+        }
+        } catch (error:any) {
+            logger.error("Error updting review",error)
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR,error))
         }
     }
 }

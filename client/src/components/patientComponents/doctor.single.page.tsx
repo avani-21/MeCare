@@ -59,7 +59,7 @@ const DoctorProfile = ({ params }: { params: Params }) => {
   
         setSlots(slotsData);
         
-        const dates = [...new Set(slotsData.map((slot: any) => {
+        const dates:string[] | any = [...new Set(slotsData.map((slot: any) => {
           const date = new Date(slot.date);
           // Manually format in YYYY-MM-DD (UTC)
           return [
@@ -234,18 +234,8 @@ const DoctorProfile = ({ params }: { params: Params }) => {
           <p className="text-gray-600">{doctorData.specialization}</p>
           <p className="text-gray-600">{doctorData.experience} years Experience</p>
 
-          {/* Rating */}
-          <div className="flex items-center mt-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <FaStar
-                  key={i}
-                  className={`${i < Math.floor(doctorData.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                />
-              ))}
-            </div>
-            <span className="ml-2">{doctorData.rating > 0 ? doctorData.rating : 'No ratings yet'}</span>
-          </div>
+     
+        
         </div>
       </div>
 

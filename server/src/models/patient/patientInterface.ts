@@ -16,5 +16,6 @@ export interface IPatient extends Document{
     pincode?:string;
     dob?:Date;
     age?:number;
-    profileImage?:string
+    profileImage?:string;
+    isBlock:boolean;
 }

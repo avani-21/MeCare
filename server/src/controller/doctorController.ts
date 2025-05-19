@@ -24,6 +24,7 @@ class DoctorController {
                 specialization?: string;
                 gender?: string;
                 experience?: number;
+                searchQuery?: string;
               } = {};
           
               if (req.query.specialization) {
@@ -34,6 +35,10 @@ class DoctorController {
               }
               if (req.query.experience) {
                 filters.experience = parseInt(req.query.experience as string);
+              }
+
+              if(req.query.searchQuery){
+                filters.searchQuery=req.query.searchQuery as string
               }
 
             logger.debug("Fetching approved doctors");
@@ -228,7 +233,7 @@ class DoctorController {
         }
     }
     
-
+  
 
 }
 

@@ -11,4 +11,15 @@ try {
 }
 }
 
-export {adminLogin}
+const logOut = async () => {
+    try {
+
+        document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+
+    } catch (error) {
+        console.error('Logout error:', error)
+        return null
+    }
+}
+
+export {adminLogin,logOut}

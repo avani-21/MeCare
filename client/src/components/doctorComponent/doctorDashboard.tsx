@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { DoctorDashboardData } from '@/type/doctor';
 import Image from 'next/image';
 import { IAppointment } from '@/type/patient';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getDashboard } from '@/lib/api/doctor/doctor';
 
 function DoctorDashboard() {
@@ -13,10 +13,17 @@ function DoctorDashboard() {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const getDashboardData = async () => {
+  const param=useParams()
+  const id=param.id as string
+
+  let doctor=localStorage.getItem("doctorId")
+
+  const getDashboardData = async (doctorId:string) => {
     try {
       setLoading(true);
-      const response = await getDashboard();
+      setData(null)
+      setTodayAppointments([])
+      const response = await getDashboard(doctorId);
       console.log(response);
       if (response) {
         setData(response.summary);
@@ -31,9 +38,12 @@ function DoctorDashboard() {
     }
   };
 
-  useEffect(() => {
-    getDashboardData();
-  }, []);
+
+ useEffect(() => {
+    if (id) {
+      getDashboardData(id);
+    }
+  }, [id]);
 
   if (loading) {
     return (
@@ -109,7 +119,7 @@ function DoctorDashboard() {
           <h2 className="text-xl font-bold text-gray-800">Upcoming Appointments</h2>
           <button 
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            onClick={() => router.push('/doctor/appointments')}
+            onClick={() => router.push(`/doctor/${id}/appointment`)}
           >
             View All
           </button>

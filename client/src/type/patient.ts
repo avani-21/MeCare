@@ -6,6 +6,7 @@ export interface ISignUpData{
 }
 
 export interface IPatient {
+    isBlocked: any;
     _id: string;
     name: string;
     email: string;
@@ -22,6 +23,8 @@ export interface IPatient {
     dob?: Date;
     age?: number;
     profileImage?: string;
+    isBlock:boolean;
+    unreadCount?: number;
   }
   
 
@@ -70,10 +73,11 @@ export interface IGoogleAuth {
     availableDays?: string[]; // Optional as it may not exist
     city?: string;
     state?: string;
+     unreadCount?: number;
   }
 
   export interface ISlot {
-    _id: string;
+    _id?: string;
     doctorId: string;
     date: string;         // "2025-04-27T14:18:11.204Z"
     startTime: string;    // "09:00"
@@ -92,6 +96,7 @@ export interface IGoogleAuth {
 
   export interface IAppointment{
     _id:string;
+    reviewId?:IReview;
     patientId?: IPatient;
     doctorId?: IDoctor ;
     slotId: string | string;
@@ -107,8 +112,8 @@ export interface IGoogleAuth {
 
   export interface IApp{
     _id?:string;
-    patientId?: string;
-    doctorId?: string ;
+    patientId?: string | IPatient;
+    doctorId?: string  | IDoctor;
     slotId: string | string;
     date: Date;
     startTime: string;
@@ -129,7 +134,7 @@ export interface Appointment {
 }
 
 export interface IReview{
-  createdAt: number;
+  createdAt?: Date;
   _id?:string,
   doctorId?:IDoctor| string;
   patientId?:IPatient |  string;
@@ -149,5 +154,23 @@ export interface Reviews{
 
 }
 
+export  interface IMessage{
+  _id?:string,
+  senderId?:string,
+  receiverId:string,
+  message:string,
+  isRead:boolean,
+  createdAt?:  Date | string;
+  updatedAt?: Date;
+}
+
+export interface AuthContextType {
+  patientData: IPatient | null;
+  loading: boolean;
+  login: (data: ILogin) => Promise<void>;
+  googleSignIn: (data: IGoogleAuth) => Promise<void>;
+  logout: () => void;
+  error: string | null;
+}
 
   

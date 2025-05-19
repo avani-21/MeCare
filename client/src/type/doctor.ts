@@ -17,12 +17,20 @@ export interface Slot {
   isBooked: boolean;
 }
 
+export interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
+
 export interface IPresscription{
   appointmentId: string;
   doctorId?: string;
   patientId:string;
   diagnosis: string;
-  medications: string[] | string;
+  medications: Medication[];
   instructions: string;
 }
 
@@ -34,8 +42,9 @@ export interface Prescription{
     gender: string; name: string 
 };
   diagnosis: string;
-  medications: string[] | string;
+  medications: Medication[];
   instructions: string;
+  createdAt?:Date;
 }
 
 export interface DoctorDashboardData{
@@ -43,4 +52,15 @@ export interface DoctorDashboardData{
     totalAppointment:number
     consultedAppointment:number
     todaysAppointment:number 
+}
+
+
+export interface RecurringSlotFormData {
+  startDate: Date;
+  endDate: Date;
+  startTime: string;
+  endTime: string;
+  frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  interval: number;
+  weekdays?: number[];
 }

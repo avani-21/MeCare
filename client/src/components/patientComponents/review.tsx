@@ -1,9 +1,7 @@
-// components/DoctorReviews.tsx
 "use client";
 import { getReviews } from "@/lib/api/patient/patient";
 import { Reviews } from "@/type/patient";
 import { useState, useEffect } from "react";
-// import { getDoctorReviews } from "@/lib/api/patient/doctors";
 import { FaStar } from "react-icons/fa";
 
 interface DoctorReviewsProps {
@@ -33,7 +31,7 @@ export default function DoctorReviews({ doctorId }: DoctorReviewsProps) {
     fetchReviews();
   }, [doctorId]);
 
-  // Get current reviews
+
   const indexOfLastReview = currentPage * reviewsPerPage;
   const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
   const currentReviews = reviews.slice(indexOfFirstReview, indexOfLastReview);
@@ -66,7 +64,7 @@ export default function DoctorReviews({ doctorId }: DoctorReviewsProps) {
         <h3 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
           {review.patientId?.name || "Anonymous"}
         </h3>
-        <span className="text-red-500 text-xl ml-1">•</span>
+      
       </div>
 
       {/* Star Rating */}

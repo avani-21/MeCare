@@ -51,14 +51,17 @@ export default function DoctorOTPVerification() {
  
     } catch (err: any) {
       toast.error(err?.response?.data?.message)
-      // console.log(Response);
       setError(err.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Resend OTP
+  useEffect(()=>{
+
+  },[router])
+
+  
   const handleResend = async () => {
     setError("");
     setMessage("");

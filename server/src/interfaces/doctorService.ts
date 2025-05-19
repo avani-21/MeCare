@@ -21,6 +21,7 @@ export interface IDoctorService{
           specialization?: string;
           gender?: string;
           experience?: number;
+          searchQuery?: string;
         }
       ): Promise<{ doctors: IDoctor[]; total: number }>;
       

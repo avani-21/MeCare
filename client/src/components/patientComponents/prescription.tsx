@@ -3,9 +3,7 @@ import { Prescription } from '@/type/doctor';
 import Logo from '../../../public/logo.png';
 import React from 'react';
 
-
 const teal800 = '#00695c';
-
 
 const styles = StyleSheet.create({
   page: {
@@ -52,23 +50,50 @@ const styles = StyleSheet.create({
     borderBottomColor: teal800,
     paddingBottom: 5,
   },
-  rxSection: {
-    marginTop: 20,
-    fontSize: 24,
-    color: teal800,
-    marginBottom: 10,
-  },
   prescriptionSection: {
     marginTop: 10,
     fontSize: 12,
   },
-  medicationItem: {
-    marginBottom: 5,
+  table: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: teal800,
   },
-  footerWave: {
-    marginTop: 30,
-    width: '100%',
-    height: 50,
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: teal800,
+  },
+  tableHeader: {
+    backgroundColor: teal800,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 10,
+    padding: 5,
+    textAlign: 'left',
+  },
+  tableCell: {
+    fontSize: 10,
+    padding: 5,
+    textAlign: 'left',
+  },
+  tableColName: {
+    width: '30%',
+    borderRightWidth: 1,
+    borderRightColor: teal800,
+  },
+  tableColDosage: {
+    width: '20%',
+    borderRightWidth: 1,
+    borderRightColor: teal800,
+  },
+  tableColFrequency: {
+    width: '30%',
+    borderRightWidth: 1,
+    borderRightColor: teal800,
+  },
+  tableColDuration: {
+    width: '20%',
   },
 });
 
@@ -76,12 +101,24 @@ interface PrescriptionTemplateProps {
   prescription: Prescription;
 }
 
+interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
 export const PrescriptionTemplate: React.FC<PrescriptionTemplateProps> = ({ prescription }) => {
 
-  const medications = Array.isArray(prescription.medications)
+  const medications: Medication[] = Array.isArray(prescription.medications) && prescription.medications.every(med => typeof med === 'object')
     ? prescription.medications
     : typeof prescription.medications === 'string'
-      ? prescription.medications.split('\n')
+      ? prescription.medications.split('\n').map(med => ({
+          name: med.trim(),
+          dosage: '',
+          frequency: '',
+          duration: '',
+        }))
       : [];
 
   return (
@@ -103,35 +140,59 @@ export const PrescriptionTemplate: React.FC<PrescriptionTemplateProps> = ({ pres
 
         {/* Patient Info */}
         <View style={styles.patientInfo}>
-          <Text>Name: {prescription.patientId?.name || "N/A"}</Text>
-          <Text>Age: {prescription.patientId?.age || "N/A"}</Text>
-          <Text>Sex: {prescription.patientId?.gender || "N/A"}</Text>
-          <Text>Date: {new Date().toLocaleDateString()}</Text>
+          <Text>Name: {prescription.patientId?.name || 'N/A'}</Text>
+          <Text>Age: {prescription.patientId?.age || 'N/A'}</Text>
+          <Text>Sex: {prescription.patientId?.gender || 'N/A'}</Text>
         </View>
-
-  
 
         {/* Prescription Content */}
         <View style={styles.prescriptionSection}>
           <Text style={{ fontWeight: 'bold' }}>Diagnosis:</Text>
-          <Text>{prescription.diagnosis || "N/A"}</Text>
+          <Text>{prescription.diagnosis || 'N/A'}</Text>
 
           <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Medications:</Text>
           {medications.length > 0 ? (
-            medications.map((medication, index) => (
-              <Text key={index} style={styles.medicationItem}>
-                {medication.trim()}
-              </Text>
-            ))
+            <View style={styles.table}>
+              {/* Table Header */}
+              <View style={[styles.tableRow, { backgroundColor: teal800 }]}>
+                <View style={styles.tableColName}>
+                  <Text style={styles.tableHeader}>Name</Text>
+                </View>
+                <View style={styles.tableColDosage}>
+                  <Text style={styles.tableHeader}>Dosage</Text>
+                </View>
+                <View style={styles.tableColFrequency}>
+                  <Text style={styles.tableHeader}>Frequency</Text>
+                </View>
+                <View style={styles.tableColDuration}>
+                  <Text style={styles.tableHeader}>Duration</Text>
+                </View>
+              </View>
+              {/* Table Rows */}
+              {medications.map((medication, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <View style={styles.tableColName}>
+                    <Text style={styles.tableCell}>{medication.name || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.tableColDosage}>
+                    <Text style={styles.tableCell}>{medication.dosage || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.tableColFrequency}>
+                    <Text style={styles.tableCell}>{medication.frequency || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.tableColDuration}>
+                    <Text style={styles.tableCell}>{medication.duration || 'N/A'}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           ) : (
             <Text>N/A</Text>
           )}
 
           <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Instructions:</Text>
-          <Text>{prescription.instructions || "N/A"}</Text>
+          <Text>{prescription.instructions || 'N/A'}</Text>
         </View>
-
-      
       </Page>
     </Document>
   );

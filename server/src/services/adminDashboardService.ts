@@ -65,5 +65,8 @@ export class AdminDashboardService implements IAdminDashboard {
         return await this._appointmentRepository.getProfitData(range)
     }
 
+    async getCustomProfitData(dateRange: { startDate: Date; endDate: Date }): Promise<ProfitData> {
+  return this._appointmentRepository.getCustomProfitData(dateRange);
+}
 
 }

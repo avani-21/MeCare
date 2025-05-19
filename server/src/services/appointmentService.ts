@@ -7,9 +7,10 @@ import { IAppointment } from "../models/appointment/appointmentInterface";
 import { SlotService } from "../services/slotServie";
 import mongoose from "mongoose";
 import { SlotRepo } from "../interfaces/slot.repo";
-import { stat } from "fs";
 import { IPrescription } from "../models/prescription/priscriptionInterface";
 import logger from "../utils/logger";
+import { IDoctor } from "../models/doctor/doctorInterface";
+import { IPatient } from "../models/patient/patientInterface";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -36,11 +37,14 @@ export class AppointmentService implements IAppointmentService {
     if (!isSlotAvailable) {
       throw new Error("Slot is not available");
     }
+    
+     const appointmentId = `APP-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     const appointment = await this._appointmentRepository.createAppointment({
         patientId: new mongoose.Types.ObjectId(patientId),  
         doctorId: new mongoose.Types.ObjectId(doctorId),
         slotId: new mongoose.Types.ObjectId(slotId),
+        appointmentId,
         date,
         startTime,
         endTime,
@@ -79,11 +83,28 @@ export class AppointmentService implements IAppointmentService {
     );
     return appointment;
   }
-  
-  async getDoctorAppointments(doctorId: string,page:number=1,limit:number=5): Promise<IAppointment[] | null> {
-    let appointments=await this._appointmentRepository.getDoctorAppointment(doctorId,page,limit)
-    return appointments
-  }
+
+
+async getDoctorAppointment(
+    doctorId: string,
+    page: number = 1,
+    limit: number = 5,
+    status: string = 'all',
+    startDate?: string,
+    endDate?: string,
+    searchQuery?:string
+): Promise<{ appointments: IAppointment[] | null; total: number }> {
+    const appointments = await this._appointmentRepository.getDoctorAppointment(
+        doctorId,
+        page,
+        limit,
+        status,
+        startDate,
+        endDate,
+        searchQuery
+    );
+    return appointments;
+}
 
   async getAllAppointments(page: number=1, limit: number=10): Promise<IAppointment[] | null> {
     let appointments=await this._appointmentRepository.getAllAppointment(page,limit)
@@ -111,16 +132,23 @@ export class AppointmentService implements IAppointmentService {
 
   async createPrescription(prescriptionData: IPrescription): Promise<IPrescription> {
     try {
-        // Validate required fields
+      
         if (!prescriptionData.appointmentId || !prescriptionData.doctorId || 
             !prescriptionData.patientId || !prescriptionData.diagnosis) {
             throw new Error('Missing required fields');
         }
 
-        // Ensure medications is an array
+      
         if (!Array.isArray(prescriptionData.medications)) {
             throw new Error('Medications must be an array');
         }
+
+      for(const med of prescriptionData.medications){
+        if(!med.name || !med.duration || !med.frequency || !med.dosage){
+           throw new Error("Each medication must have name,frequency,dosage and duration")
+        }
+      }
+
 
         return await this._appointmentRepository.createPrescription(prescriptionData);
     } catch (error) {
@@ -133,6 +161,12 @@ async getPrescription(AppointmentId: string): Promise<IPrescription[] | null> {
   return await this._appointmentRepository.getPrescription(AppointmentId)
 }
 
+async getDoctorByPatient(patientId: string): Promise<IDoctor[] | null> {
+   return await this._appointmentRepository.getDoctorsByPatient(patientId)
+}
 
+async getPatientsByDoctors(doctorId: string): Promise<IPatient[] | null> {
+  return await this._appointmentRepository.getPatientsByDoctors(doctorId)
+}
 
 }
