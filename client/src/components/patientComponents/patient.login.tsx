@@ -6,12 +6,11 @@ import Image from "next/image";
 import Google from "../../../public/google.png";
 import { useRouter } from "next/navigation";
 import { ILogin } from "@/type/patient";
-import { login } from "@/lib/api/patient/auth";
-import {auth,googlePprovider,signInWithPopup} from "@/lib/firebase"
-import {User} from "firebase/auth"
+import { auth, googlePprovider, signInWithPopup } from "@/lib/firebase";
+import { User } from "firebase/auth";
 import { toast } from "sonner";
-import { googleSignIn } from "@/lib/api/patient/auth";
-import {IGoogleAuth} from "@/type/patient"
+import { IGoogleAuth } from "@/type/patient";
+import { usePatient } from "@/context/authContext";
 
 interface ErrorState {
   email?: string;
@@ -24,10 +23,9 @@ export default function PatientLogin() {
     password: "",
   });
 
-  const [error, setError] = useState<ErrorState>({}); 
-  const [loading, setLoading] = useState(false);
-
-  let router=useRouter()
+  const [error, setError] = useState<ErrorState>({});
+  const { login, googleSignIn, loading, error: authError } = usePatient();
+  const router = useRouter();
 
   const validateForm = () => {
     let tempError: ErrorState = {};
@@ -63,52 +61,41 @@ export default function PatientLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setLoading(true);
 
-    let data:ILogin={
-      email:formData.email,
-      password:formData.password
-    }
+    let data: ILogin = {
+      email: formData.email,
+      password: formData.password,
+    };
+
     try {
-  let result=await login(data)
-  if(result){
-    router.push("/home")
-  } 
-    } catch (error) {
+      await login(data); 
+      toast.success("User logged in successfully");
+      router.replace("/");
+    } catch (error: any) {
+      toast.error(error.message || "Your account is blocked by Admin or your verification process is not completed");
       console.error("Error logging in:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const googleauthSignIn=async ()=>{
-    try{
-      const result=await signInWithPopup(auth,googlePprovider);
+  const googleauthSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googlePprovider);
       console.log(result);
-      
-      const user:User=result.user
 
+      const user: User = result.user;
       const { email } = user;
       const googleId = user.uid;
 
-      interface Data{
-        googleId:string,
-        email:string|null
-      }
-      const data:Data={googleId,email}
-      
+      const data: IGoogleAuth = { googleId, email };
 
-      const response=await googleSignIn(data);
-      if(response){
-        toast.success("Loged in successfully")
-        router.push("/")
-      }
-
-    }catch(error:any){
-      console.log(error.message)
-
+      await googleSignIn(data); 
+      toast.success("Logged in successfully");
+      router.replace("/");
+    } catch (error: any) {
+      toast.error(error.message || "Google Sign-In failed");
+      console.error("Google Sign-In error:", error);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center items-center mt-10 bg-white">
@@ -119,6 +106,8 @@ export default function PatientLogin() {
         <p className="text-gray-600 text-center mb-6">
           Please login to book appointment
         </p>
+
+        {/* {authError && <div className="text-red-600 text-center mb-4">{authError}</div>} */}
 
         <form onSubmit={handleSubmit}>
           {/* Email Input */}
@@ -150,7 +139,7 @@ export default function PatientLogin() {
               <div className="text-red-600">{error.password}</div>
             )}
             <Link
-              href="/forgot-password"
+              href="/otp_send"
               className="text-teal-600 text-sm float-left mt-2 hover:underline"
             >
               Forgot password?
@@ -162,7 +151,6 @@ export default function PatientLogin() {
             type="submit"
             className="w-full bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 transition"
             disabled={loading}
-            onClick={handleSubmit}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -177,19 +165,20 @@ export default function PatientLogin() {
 
         {/* Google Login */}
         <button
-  type="button"  // Prevents form submission on click
-  className="w-full flex items-center justify-center border py-2 rounded-lg hover:bg-gray-100 transition"
-  onClick={googleauthSignIn}
->
-  <Image
-    src={Google}
-    alt="Google"
-    width={20}
-    height={20}
-    className="mr-2"
-  />
-  Continue with Google
-</button>
+          type="button"
+          className="w-full flex items-center justify-center border py-2 rounded-lg hover:bg-gray-100 transition"
+          onClick={googleauthSignIn}
+          disabled={loading}
+        >
+          <Image
+            src={Google}
+            alt="Google"
+            width={20}
+            height={20}
+            className="mr-2"
+          />
+          Continue with Google
+        </button>
 
         {/* Signup Link */}
         <p className="text-center text-sm mt-4 text-gray-600">

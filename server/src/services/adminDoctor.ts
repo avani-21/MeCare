@@ -6,10 +6,17 @@ import mongoose from "mongoose";
 import TYPES from "../di/types";
 import { IPatient } from "../models/patient/patientInterface";
 import logger from "../utils/logger";
+import { ISlot } from "../models/slot/slotInterface";
+import { SlotRepo } from "../interfaces/slot.repo";
+
+
 
 @injectable()
 class DocRegService {
-  constructor(@inject(TYPES.DoctorRegRepository) private doctorRepository: IDocRegRepo) {}
+  constructor(
+    @inject(TYPES.DoctorRegRepository) private doctorRepository: IDocRegRepo,
+    @inject(TYPES.SlotRepository) private slotRepository: SlotRepo  
+  ) {}
 
   async registerDoctor(doctorData: Partial<IDoctor>, files: any): Promise<IDoctor> {
     logger.debug(`Registering doctor with email: ${doctorData.email}`);
@@ -41,7 +48,8 @@ class DocRegService {
     } as IDoctor;
     logger.info("Doctor registered successfully")
 
-    return await this.doctorRepository.createDoctor(newDoctor);
+    const createdDoctor = await this.doctorRepository.createDoctor(newDoctor);
+    return createdDoctor;
   }
 
   private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
@@ -80,3 +88,4 @@ class DocRegService {
 }
 
 export default DocRegService;
+

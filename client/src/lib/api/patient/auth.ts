@@ -51,5 +51,24 @@ const googleSignIn=async (data:IGoogleAuth):Promise<IGoogleAuth>=>{
  }
 }
 
+const sendOtp=async (email:string)=>{
+    try {
+       const response=await API.post("/patient/send_otp",{email})
+       return response
+    } catch (error:any) {
+         throw new Error(error.message)
+    }
+   }
 
-export {signUpPatient,verifyOtp,resendOtp,login,googleSignIn}
+   const resetPassword=async (email:string,password:string)=>{
+      try {
+         const response=await API.post("/patient/reset_password",{email,password})
+         return response
+      } catch (error:any) {
+        throw new Error(error.message)
+      }
+   }
+   
+
+
+export {signUpPatient,verifyOtp,resendOtp,login,googleSignIn,sendOtp,resetPassword}

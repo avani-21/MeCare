@@ -70,4 +70,17 @@ const getPatients=async (page:number=1,limit:number=10)=>{
   }
 }
 
-export {registerDoctor,listDoctor,editDoctor,toggleApprovelStatus,getPatients}
+const togglePatientStatus=async (patientId:string)=>{
+    try {
+      let response=await API.put(`/admin/toggle_status/${patientId}`)
+         document.cookie = 'patientToken=;  expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      if(response){
+        return response
+      }
+    } catch (error) {
+       console.log(error)
+    }
+}
+
+
+export {registerDoctor,listDoctor,editDoctor,toggleApprovelStatus,getPatients,togglePatientStatus}

@@ -8,6 +8,9 @@ import { IPatient } from "../models/patient/patientInterface";
 import { IPatientRepository } from "../interfaces/patient.repository";
 import TYPES from "../di/types";
 import logger from "../utils/logger";
+import cloudinary from "../config/cloudinary.config";
+import { error, info } from "console";
+import { IReview } from "../models/reviews/reviewInterface";
 
 dotenv.config();
 
@@ -58,6 +61,7 @@ class PatientService implements IPatientService {
       logger.warn(`Invalid OTP attempt for ${email}`);
       throw new Error("Invalid OTP");
     }
+    
     logger.info(`Patient verified successfully: ${email}`);
     await this.patientRepository.verifyAndUpdatePatient(email);
     return { message: "OTP verified successfully. You can now log in." };
@@ -89,6 +93,11 @@ class PatientService implements IPatientService {
     if (!patient.isVerified) {
       logger.warn(`Unverified patient login attempt: ${email}`);
       throw new Error("Please verify your account via OTP");
+    }
+
+    if(patient.isBlock){
+      logger.warn("Blocked user ty  to attemmpt login");
+      throw new Error("You are Blocked by Admin")
     }
 
     const isValidPassword = await bcrypt.compare(password, patient.password);
@@ -134,6 +143,73 @@ class PatientService implements IPatientService {
     logger.info(`Google auth successful for: ${email}`)
     return { accessToken, refreshToken };
   }
+
+  async resetPassword(email: string, password: string): Promise<{ message: string; patient: IPatient | null}> {
+       
+          let hashPassword=await bcrypt.hash(password,10)
+          const updatePassword=await this.patientRepository.findByEmailAndUpdate(email,hashPassword)
+          if(!updatePassword){
+            return {message:"patient not found",patient:null}
+          }
+
+          return {message:"Patient password resetted successfully",patient:updatePassword} 
+  }
+
+  async getUserProfile(email: string): Promise<IPatient | null> {
+   return  await this.patientRepository.findByEmail(email)
+  }
+
+  async updateProfile(patientId: string, updates: Partial<IPatient>,image?: Express.Multer.File): Promise<IPatient> {
+    try {
+       logger.debug("Updating patient profile")
+       let imgURL=updates.profileImage;
+
+       if(image){
+        logger.debug("Uploading image for patient")
+        const cloudinaryResult=await cloudinary.uploader.upload(image.path,{
+          folder:"patient_profile",
+        })
+        imgURL=cloudinaryResult.secure_url
+       }
+          
+   const updatedProfile=await this.patientRepository.updateProfile(patientId,{
+    ...updates,
+    profileImage:imgURL,
+   })
+   logger.info("Patient profile data updated successfully")
+   return updatedProfile
+    } catch (error) {
+       logger.error("Error updating patient profile")
+       console.error("Error updating patient profile:", error);
+       throw error;
+    }
+}
+
+  async changePassword(patientId: string, newPassword: string, confirmPassword: string): Promise<void> {
+    if (newPassword !== confirmPassword) {
+      throw new Error("Passwords do not match");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.patientRepository.changePassword(patientId, hashedPassword);
+  }
+
+  async createReview(reviewData: IReview): Promise<IReview> {
+    return await this.patientRepository.createReview(reviewData) 
+  }
+
+  async getReviewByAppointment(appointmentId: string): Promise<IReview | null> {
+    return await this.patientRepository.getReview(appointmentId);
+  }
+
+  async getReviewByDoctorId(doctorId: string): Promise<IReview[] | null> {
+    return await this.patientRepository.getReviewByDoctorId(doctorId)
+  }
+
+  async updateReview(reviewId: string, updateData: Partial<IReview>): Promise<IReview | null> {
+    return await this.patientRepository.updateReview(reviewId,updateData)
+  }
+
 }
 
 export default PatientService;

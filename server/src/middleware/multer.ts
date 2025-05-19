@@ -8,6 +8,7 @@ const storage = new CloudinaryStorage({
     folder: "profile",
     format: file.mimetype.split("/")[1],
     public_id: `${file.originalname.split(".")[0]}-${Date.now()}`, 
+    resource_type: "auto"
   }),
 });
 

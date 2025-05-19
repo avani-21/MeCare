@@ -7,6 +7,7 @@ import TYPES from "../di/types";
 import { IAdminService } from "../interfaces/admin.service";  
 import { generateAccessToken,generateRefreshToken } from "../utils/jwtHelper";
 import logger from "../utils/logger"
+import { IPatient } from "../models/patient/patientInterface";
 
 @injectable()
 class AdminService implements IAdminService { 
@@ -29,6 +30,10 @@ class AdminService implements IAdminService {
     const refreshToken = generateRefreshToken(admin.id, admin.email, "admin");
     logger.info(`Admin login successful for: ${email}`);
     return { accessToken, refreshToken };
+  }
+
+  async togglePatientStatus(patientId: string): Promise<IPatient | null> {
+    return await this.adminRepository.togglePatientStatus(patientId)
   }
 }
 

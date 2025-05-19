@@ -3,11 +3,13 @@ import { inject, injectable } from "inversify";
 import TYPES from "../di/types";
 import AdminService from "../services/adminSrevice";
 import jwt from "jsonwebtoken";
-import { generateAccessToken } from "../utils/jwtHelper";
+import { generateAccessToken, generateRefreshToken } from "../utils/jwtHelper";
 import { HttpStatus } from "../utils/httptatus";
 import { errorResponse, successResponse } from "../types/types";
 import logger from "../utils/logger";
-import { warn } from "console";
+import { StatusMessages } from "../utils/message";
+import { AuthenticatedRequest } from "../middleware/patientAuthMiddleware";
+
 
 @injectable()
 export class AdminController {
@@ -41,55 +43,87 @@ export class AdminController {
                 maxAge: 30 * 24 * 60 * 60 * 1000,
             });
 
-            res.status(HttpStatus.CREATED).json(successResponse("Logged in successfully", { accessToken,refreshToken }));
+            res.status(HttpStatus.CREATED).json(successResponse(StatusMessages.CREATED, { accessToken,refreshToken }));
         } catch (error: any) {
-            res.status(HttpStatus.UNAUTHORIZED).json(errorResponse(error.message));
+            res.status(HttpStatus.UNAUTHORIZED).json(errorResponse(StatusMessages.UNAUTHORIZED,error.message));
         }
     }
-
-
 
     async refreshToken(req: Request, res: Response): Promise<any> {
         try {
             const refreshToken = req.cookies.refreshToken;
-            logger.http(`Refresh token request received`);
-
+    
             if (!refreshToken) {
-                logger.warn("Refresh token missing")
-                return res.status(401).json({ error: "Refresh Token missing" });
+                return res.status(HttpStatus.UNAUTHORIZED).json({
+                    error: "Refresh token missing",
+                    code: "REFRESH_TOKEN_MISSING",
+                });
             }
     
-            const secretKey = process.env.JWT_REFRESH_SECRET;
-           console.log(secretKey)
-            if (!secretKey) {
-                logger.warn("JWT_REFRESH_SECRET is not defined in .env")
-                return res.status(500).json({ error: "Server error: Missing secret key" });
-            }
-               jwt.verify(refreshToken, secretKey, (err: any, decoded: any) => {
-                if (err) {
-                    logger.error(err.message)
-                    return res.status(403).json({ error: "Invalid Refresh token" });
-                }
+            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as {
+                id: string;
+                email: string;
+            };
     
+            // Generate new tokens (optionally rotate refresh token)
+            const newAccessToken = generateAccessToken(decoded.id, decoded.email, "admin");
+            const newRefreshToken = generateRefreshToken(decoded.id, decoded.email, "admin");
     
-                if (!decoded || !decoded.id || !decoded.email) {
-                    logger.warn("Invalid token payload")
-                    return res.status(400).json({ error: "Invalid token payload" });
-                }
-
-                console.log("Received Refresh Token from Cookies:", req.cookies.refreshToken);
-                console.log("Using JWT_REFRESH_SECRET for Verification:", process.env.JWT_REFRESH_SECRET);
-
-                const newAccessToken = generateAccessToken(decoded.id, decoded.email,"admin");
-                logger.info(`New access token generated for admin: ${decoded.email}`);
-                return res.status(200).json({ accessToken: newAccessToken });
+            // Set new cookies
+            res.cookie("adminToken", newAccessToken, {
+                httpOnly: false,
+                maxAge: 15 * 60 * 1000,
             });
     
+            res.cookie("refreshToken", newRefreshToken, {
+                httpOnly: false,
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+            });
+    
+            return res.status(HttpStatus.OK).json({
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+            });
         } catch (error: any) {
-            logger.error("Refresh token error:", error.message);
-            return res.status(500).json({ error: error.message });
+            if (error.name === "TokenExpiredError") {
+                return res.status(HttpStatus.UNAUTHORIZED).json({
+                    error: "Refresh token expired",
+                    code: "REFRESH_TOKEN_EXPIRED",
+                });
+            }
+            return res.status(HttpStatus.FORBIDDEN).json({ error: "Invalid token." });
         }
     }
-    
 
+      async logOut(req:Request,res:Response){
+        try {
+            res.clearCookie("patientToken",{
+                httpOnly:true,
+                secure:false,
+                sameSite:"none"
+            })
+            logger.info("JWT cleared from cooki successfully")
+            return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK))
+        } catch (error) {
+             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    async togglePatientBlockStatus(req:Request,res:Response){
+        try {
+            let patientId=req.params.id
+            if(!patientId){
+                logger.warn("Patient id is missing")
+                return res.status(HttpStatus.BAD_REQUEST).json(errorResponse(StatusMessages.ID_NOT_FOUNT))
+            }
+            let response=await this._adminService.togglePatientStatus(patientId)
+            if(response){
+                logger.info("Status changged successfully")
+                return res.status(HttpStatus.OK).json(successResponse(StatusMessages.OK))
+            }
+        } catch (error) {
+            logger.warn("Error occured during the patient status toggle")
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse(StatusMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
 }

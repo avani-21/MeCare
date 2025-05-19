@@ -12,6 +12,7 @@ const transporter=nodemailer.createTransport({
 })
 
 const sendOtpEmail=async (email:string,otp:string)=>{
+  console.log(otp)
     try{
       await transporter.sendMail({
         from:process.env.EMAIL_USER,

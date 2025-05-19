@@ -1,8 +1,16 @@
+"use client";
 import Image from "next/image";
 import React from "react";
+import { useRouter } from "next/navigation"; // Updated import for Next.js 13+
 import Banner1 from "../../../public/bannerImage.png";
 
 function Banner() {
+  const router = useRouter();
+
+  const handleBookAppointment = () => {
+    router.push("/doctors");
+  };
+
   return (
     <div className="flex flex-col md:flex-row items-center justify-between px-6 md:px-16 py-30 bg-white ">
       {/* Left Content */}
@@ -19,14 +27,16 @@ function Banner() {
           medical professionals, cutting-edge technology, and compassionate
           approach make us a leader in the healthcare industry.
         </p>
-        <button className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition">
+        <button 
+          className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition"
+          onClick={handleBookAppointment}
+        >
           Book Appointments
         </button>
       </div>
 
       {/* Right Content */}
       <div className="md:w-1/2 relative flex justify-center mt-10 md:mt-0">
-      
         {/* Doctor Image */}
         <Image
           src={Banner1}

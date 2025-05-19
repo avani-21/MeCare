@@ -1,37 +1,67 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { HttpStatus } from '../utils/httptatus';
+import PatientModel from '../models/patient/patientModel'; // Import PatientModel
+import { IPatient } from '../models/patient/patientInterface';
 
 dotenv.config();
 
-interface AuthenticatedRequest extends Request {
-  user?: { id: string; role: string };
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    role: string;
+    email: string;
+  };
 }
 
-const authenticatePatient = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-        const token = req.header("Authorization")?.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ error: "Access Denied. No token provided." });
-        }
+const authenticatePatient = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const token = req.cookies.patientToken || req.header('Authorization')?.split(' ')[1];
 
-        const secretKey = process.env.ACCESS_TOKEN_SECRET as string;
-        jwt.verify(token, secretKey, (err: any, decoded: any) => {
-            if (err) {
-                return res.status(401).json({ error: "Access Token Expired. Please refresh your token." });
-            }
-
-            if (decoded.role !== "patient") {
-                return res.status(403).json({ error: "Forbidden. Unauthorized role." });
-            }
-
-            req.user = decoded;
-            next();
-        });
-    } catch (error) {
-        return res.status(400).json({ error: "Invalid token." });
+    if (!token) {
+      res.status(HttpStatus.UNAUTHORIZED).json({
+        error: 'Access Denied. No token provided.',
+      });
+      return;
     }
-};
 
+    jwt.verify(token, process.env.JWT_SECRET!, async (err: any, decoded: any) => {
+
+      if (err) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          error: 'Access Token Expired. Please refresh your token.',
+          code: 'TOKEN_EXPIRED',
+        });
+      }
+
+      if (decoded.role !== 'patient') {
+        return res.status(HttpStatus.FORBIDDEN).json({
+          error: 'Forbidden. Unauthorized role.',
+        });
+      }
+
+      // Check if patient is blocked
+      const patient: IPatient | null = await PatientModel.findById(decoded.id);
+      if (!patient) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          error: 'Patient not found.',
+        });
+      }
+      if (patient.isBlock) {
+        return res.status(HttpStatus.FORBIDDEN).json({
+          error: 'Account is blocked.',
+        });
+      }
+
+      req.user = decoded;
+      next();
+    });
+  } catch (error) {
+    res.status(HttpStatus.BAD_REQUEST).json({
+      error: 'Invalid token.',
+    });
+  }
+};
 
 export default authenticatePatient;

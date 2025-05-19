@@ -9,13 +9,19 @@ import doctorRoutes from "./routes/doctorRoutes"
 import cookieParser  from "cookie-parser"
 import morganMiddleware from "./middleware/morgen"
 import logger from "./utils/logger"
+import SocketService from "./socket"
+import { createServer } from "http"
+import redisClient from "./config/redis"
+
 
 console.log("Reflect.hasOwnMetadata exists:", typeof Reflect.hasOwnMetadata !== "undefined");
 
 dotenv.config();
 const app=express()
+const server=createServer(app)
 
 connectDb();
+redisClient.connect()
 
 app.use(express.json())
 // app.use(cors({ origin: '*' }));
@@ -37,6 +43,8 @@ app.use(cors({
 
 app.use(morganMiddleware)
 
+SocketService.getInstance(server)
+
 app.use("/api/patient",patientRoutes)
 app.use("/api/admin",adminRoutes)
 app.use("/api/doctor",doctorRoutes)
@@ -44,6 +52,8 @@ app.use("/api/doctor",doctorRoutes)
 
 const PORT=process.env.PORT || 5000
 
-app.listen(PORT,()=>{
+
+server.listen(PORT, async () => {
+  await connectDb();
   logger.info(`Server started on port ${PORT}`);
-})
+});

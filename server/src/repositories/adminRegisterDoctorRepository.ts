@@ -4,12 +4,27 @@ import { IDoctor } from "../models/doctor/doctorInterface";
 import { IDocRegRepo } from "../interfaces/register.doctor.repo";
 import PatientModel from "../models/patient/patientModel";
 import { IPatient } from "../models/patient/patientInterface";
+import mongoose from "mongoose";
+import { ISlot } from "../models/slot/slotInterface";
+import SlotModel from "../models/slot/slotModel";
 
 @injectable()
 export class AdminDoctorRepository implements IDocRegRepo {
 
     async createDoctor(data: IDoctor): Promise<IDoctor> {
-        return await DoctorModel.create(data); 
+      const newDoctor = new DoctorModel(data);
+      return await newDoctor.save();
+    }
+
+    async saveSlots(doctorId: string, slots: ISlot[]): Promise<void> {
+   
+      const formattedSlots = slots.map(slot => ({
+        ...slot,
+        date: new Date(slot.date),
+        doctorId: new mongoose.Types.ObjectId(doctorId)
+      }));
+      
+      await SlotModel.insertMany(formattedSlots);
     }
 
     async findDoctorByEmail(email: string): Promise<IDoctor | null> {
@@ -50,15 +65,14 @@ export class AdminDoctorRepository implements IDocRegRepo {
         const skip = (page - 1) * limit;
         const query: any = {};
       
-        // Specialization Filter (case-insensitive exact match)
         if (filters.specialization) {
           query.specialization = { 
-            $regex: `^${filters.specialization}$`, // Exact match with regex
+            $regex: `^${filters.specialization}$`, 
             $options: 'i' 
           };
         }
       
-        // Execute Query
+      
         const [doctors, total] = await Promise.all([
           DoctorModel.find(query).skip(skip).limit(limit).lean(),
           DoctorModel.countDocuments(query)
@@ -66,4 +80,5 @@ export class AdminDoctorRepository implements IDocRegRepo {
       
         return { doctors, total };
       }
+    
 }

@@ -6,6 +6,8 @@ import { AdminController } from "../controller/adminController";
 import upload from "../middleware/multer";
 import DocRegController from "../controller/adminDoctorController";
 import authenticateAdmin from "../middleware/adminAuthMiddleware"; // Import middleware
+import { AppointmentController } from "../controller/appointmentController";
+import { DashboardController } from "../controller/dashboardController";
 
 let router = Router();
 
@@ -13,6 +15,8 @@ let router = Router();
 
 const adminController = container.get<AdminController>(TYPES.adminController);
 const adminDoctorController = container.get<DocRegController>(TYPES.DocRegController);
+const appointmentController=container.get<AppointmentController>(TYPES.AppointmentController)
+const admindashboardController=container.get<DashboardController>(TYPES.AdmindashboardController)
 
 
 router.post("/admin_login", async (req: Request, res: Response) => {
@@ -51,5 +55,25 @@ router.patch("/doctor/toggle_approval/:id", authenticateAdmin, async (req: Reque
 router.get("/patients", authenticateAdmin, async (req: Request, res: Response) => {
   await adminDoctorController.getAllPatients(req, res);
 });
+
+router.put('/toggle_status/:id',async (req:Request,res:Response)=>{
+  await adminController.togglePatientBlockStatus(req,res)
+})
+
+router.get("/appointments",authenticateAdmin,async (req:Request,res:Response)=>{
+  await appointmentController.getAllAppointments(req,res)
+})
+
+router.get("/dashboard",authenticateAdmin,async (req:Request,res:Response)=>{
+  await admindashboardController.getDashboard(req,res)
+})
+
+router.get('/profitData',authenticateAdmin,async (req:Request,res:Response)=>{
+  await admindashboardController.getProfitDataForAdmin(req,res)
+})
+
+router.post('/logout',async (req:Request,res:Response)=>{
+  adminController.logOut(req,res)
+})
 
 export default router;

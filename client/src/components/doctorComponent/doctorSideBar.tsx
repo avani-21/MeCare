@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../../public/logo.png";
 import { Menu, X, Home, Calendar, User, MessageSquare,ClipboardList} from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logOut } from "@/lib/api/doctor/doctor";
+
 
 interface NavbarLayoutProps {
   children?: React.ReactNode;
@@ -14,8 +16,8 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
   const [doctorId, setDoctorId] = useState<string | null>(null);
+  let route=useRouter()
 
-  // Ensure localStorage is accessed only on the client side
   useEffect(() => {
     if (typeof window !== "undefined") {
       setDoctorId(localStorage.getItem("doctorId"));
@@ -24,10 +26,17 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
 
   const menuItems = [
     { name: "Dashboard", icon: <Home size={20} />, href: `/doctor/${doctorId}/dashboard` },
-    { name: "Appointment", icon: <Calendar size={20} />, href: "" },
+    { name: "Appointment", icon: <Calendar size={20} />, href: `/doctor/${doctorId}/appointment` },
     { name: "My Profile", icon: <User size={20} />, href: `/doctor/${doctorId}/profile` },
-    { name: "My Chats", icon: <ClipboardList size={20} />, href: "" },
+    { name: "Slot Managment", icon: <User size={20} />, href: `/doctor/${doctorId}/slot_managment` },
+    { name: "Review Book", icon: <ClipboardList size={20} />, href: `/doctor/${doctorId}/reviews` },
+    { name: "My Chats", icon: <ClipboardList size={20} />, href:  `/doctor/${doctorId}/chat` },
   ];
+
+  const handleLogout=async ()=>{
+      let response=await logOut()
+      route.replace("/doctor/send_otp")
+  }
 
   return (
     <div className="flex h-screen">
@@ -62,7 +71,7 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
           <button className="md:hidden" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             <Menu size={24} />
           </button>
-          <Link href="/login" className="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700">
+          <Link href="/login" className="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700" onClick={handleLogout}>
             Logout
           </Link>
         </nav>
