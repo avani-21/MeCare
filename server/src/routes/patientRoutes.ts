@@ -67,7 +67,7 @@ router.get("/doctors/slot/:id",authenticatePatient,async(req:Request,res:Respons
  await slotController.findSlotBydoctor(req,res)
 })
 
-
+// profile
 
 router.patch("/profile",authenticatePatient,upload.single("profileImage"),async (req:Request,res:Response)=>{
   await patientController.updateProfile(req,res)
@@ -75,6 +75,8 @@ router.patch("/profile",authenticatePatient,upload.single("profileImage"),async 
 router.patch("/change_password",authenticatePatient,async (req:Request,res:Response)=>{
   await patientController.changePassword(req,res)
 })
+
+//Appointment
 
 router.post("/doctor/appointment",authenticatePatient,async (req:Request,res:Response)=>{
   await appointmentController.bookAppointment(req,res)
@@ -101,6 +103,8 @@ router.get("/prescription/:appointmentId",authenticatePatient,async (req:Request
     appointmentController.getPrescription(req,res)
 })
 
+//review
+
 router.post('/review/:doctorId',authenticatePatient ,async (req:Request,res:Response)=>{
    patientController.createReview(req,res)
 })
@@ -112,6 +116,8 @@ router.get('/review/:appointmentId', authenticatePatient,async (req:Request,res:
 router.put('/reviews/:reviewId',authenticatePatient, async (req:Request,res:Response)=>{
   patientController.updateReview(req,res)
 })
+
+// chat
 
 router.post('/send_message',authenticatePatient,async (req:Request,res:Response)=>{
     chatController.sendMessage(req,res)
@@ -125,10 +131,6 @@ router.get('/get_conversation/:user1Id',authenticatePatient,async (req:Request,r
   chatController.getConversation(req,res)
 })
 
-router.post('/logout',async (req:Request,res:Response)=>{
-  patientController.logOut(req,res)
-})
-
 router.get('/get_unread_message_count/:id',authenticatePatient,async (req:Request,res:Response)=>{
   chatController.getUnreadMessageCount(req,res)
 })
@@ -136,5 +138,12 @@ router.get('/get_unread_message_count/:id',authenticatePatient,async (req:Reques
 router.put('/mark_read/:id',authenticatePatient,async (req:Request,res:Response)=>{
   chatController.markMessageAsRead(req,res)
 })
+
+//Logout
+
+router.post('/logout',async (req:Request,res:Response)=>{
+  patientController.logOut(req,res)
+})
+
 
 export default router;

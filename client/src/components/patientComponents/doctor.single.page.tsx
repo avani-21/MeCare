@@ -81,6 +81,12 @@ const DoctorProfile = ({ params }: { params: Params }) => {
   };
   
   const handleAppointmentConfirmation = async (slot: ISlot) => {
+      
+    if(!slot._id){
+       new Error("Slot id does not exist")
+      return
+    }
+
     try {
       const appointmentData = {
         doctorId: doctorData?._id,

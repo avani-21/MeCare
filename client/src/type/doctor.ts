@@ -30,7 +30,7 @@ export interface IPresscription{
   doctorId?: string;
   patientId:string;
   diagnosis: string;
-  medications: Medication[];
+  medications: Medication[] | string ;
   instructions: string;
 }
 
@@ -42,7 +42,7 @@ export interface Prescription{
     gender: string; name: string 
 };
   diagnosis: string;
-  medications: Medication[];
+  medications: Medication[] | string;
   instructions: string;
   createdAt?:Date;
 }

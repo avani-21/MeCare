@@ -16,7 +16,7 @@ function DoctorDashboard() {
   const param=useParams()
   const id=param.id as string
 
-  let doctor=localStorage.getItem("doctorId")
+  // let doctor=localStorage.getItem("doctorId")
 
   const getDashboardData = async (doctorId:string) => {
     try {

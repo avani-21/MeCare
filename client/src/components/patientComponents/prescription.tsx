@@ -113,13 +113,13 @@ export const PrescriptionTemplate: React.FC<PrescriptionTemplateProps> = ({ pres
   const medications: Medication[] = Array.isArray(prescription.medications) && prescription.medications.every(med => typeof med === 'object')
     ? prescription.medications
     : typeof prescription.medications === 'string'
-      ? prescription.medications.split('\n').map(med => ({
-          name: med.trim(),
-          dosage: '',
-          frequency: '',
-          duration: '',
-        }))
-      : [];
+     ? prescription.medications.split('\n').map(med => ({
+        name: med.trim(),
+        dosage: '',
+        frequency: '',
+        duration: '',
+      }))
+    : prescription.medications
 
   return (
     <Document>

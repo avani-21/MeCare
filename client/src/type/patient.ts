@@ -114,7 +114,7 @@ export interface IGoogleAuth {
     _id?:string;
     patientId?: string | IPatient;
     doctorId?: string  | IDoctor;
-    slotId: string | string;
+    slotId: string ;
     date: Date;
     startTime: string;
     endTime: string;

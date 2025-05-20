@@ -21,6 +21,8 @@ const doctordDashboardController=container.get<DashboardController>(TYPES.Admind
 const patientController=container.get<PatientAuthController>(TYPES.PatientAuthController)
 const chatController=container.get<ChatController>(TYPES.ChatController)
 
+//Doctor Auth
+
 router.post("/send_otp",(req:Request,res:Response)=>{
     doctorController.sendOtp(req,res)
 })
@@ -33,21 +35,24 @@ router.post("/resend_otp",(req:Request,res:Response)=>{
     doctorController.resendOtp(req,res)
 })
 
-router.put("/profile/:doctorId",authenticateDoctor,upload.single("profileImg"),(req,res)=>{
-    doctorController.updateDoctor(req,res)
-})
-
-
 router.post('/google-auth', (req:Request, res:Response) =>{
    doctorController.googleAuth(req,res)
 })
+
+router.get("/refresh_token",(req:Request,res:Response)=>{
+    doctorController.refreshToken(req,res)
+})
+
+
+//Pages
 
 router.get("/fetch_doctor/:doctorId",authenticateDoctor,(req:Request,res:Response)=>{
     doctorController.getDoctor(req,res)
 })
 
-router.get("/refresh_token",(req:Request,res:Response)=>{
-    doctorController.refreshToken(req,res)
+
+router.put("/profile/:doctorId",authenticateDoctor,upload.single("profileImg"),(req,res)=>{
+    doctorController.updateDoctor(req,res)
 })
 
 router.get("/my_appointment",authenticateDoctor,async (req:Request,res:Response)=>{
@@ -57,6 +62,8 @@ router.get("/my_appointment",authenticateDoctor,async (req:Request,res:Response)
 router.patch("/update_status/:id",async (req:Request,res:Response)=>{
     appointmentController.changeAppointmentStatus(req,res)
 })
+
+// Slots
 
 router.get("/get_slots/:id",async (req:Request,res:Response)=>{
     slotController.getAllSlotsOfDoctor(req,res)
@@ -70,6 +77,16 @@ router.post('/recurring_slot',authenticateDoctor,async (req:Request,res:Response
     slotController.createRecurringSlots(req,res)
 })
 
+router.patch('/slot_edit/:id',authenticateDoctor,async (req:Request,res:Response)=>{
+    await slotController.editSlot(req,res)
+})
+
+router.patch('/slot_cancel/:id',authenticateDoctor,async (req:Request,res:Response)=>{
+    await slotController.cancelSlot(req,res)
+})
+
+//Prescription
+
 router.post("/prescription/:id",async (req:Request,res:Response)=>{
     appointmentController.createPrescription(req,res)
 })
@@ -78,15 +95,20 @@ router.get("/prescription/:appointmentId",async (req:Request,res:Response)=>{
     appointmentController.getPrescription(req,res)
 })
 
+
+//  Dashboard
+
 router.get("/dashboard/:id",async (req:Request,res:Response)=>{
    doctordDashboardController.getDoctorDashboard(req,res)  
 })
+
+//Reviews
 
 router.get("/reviews/:doctorId", async (req:Request,res:Response)=>{
      patientController.getReviewByDoctorId(req,res)
 })
 
-
+//Chat
 
 router.post('/send_message',authenticateDoctor,async (req:Request,res:Response)=>{
     chatController.sendMessage(req,res)
@@ -104,13 +126,7 @@ router.post('/logout',async (req:Request,res:Response)=>{
   patientController.logOut(req,res)
 })
 
-router.patch('/slot_edit/:id',authenticateDoctor,async (req:Request,res:Response)=>{
-    await slotController.editSlot(req,res)
-})
 
-router.patch('/slot_cancel/:id',authenticateDoctor,async (req:Request,res:Response)=>{
-    await slotController.cancelSlot(req,res)
-})
 
 router.get('/get_unread_message_count/:id',authenticateDoctor,async (req:Request,res:Response)=>{
   chatController.getUnreadMessageCount(req,res)
