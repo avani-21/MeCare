@@ -3,21 +3,18 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../../public/logo.png";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown, User, Stethoscope, Lock } from "lucide-react"; // Added icons
 import Cookies from "js-cookie";
 
-
-export default  function Navbar() {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [patientToken, setPatientToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const cookies = Cookies.get();
-    console.log("cookies",cookies)
-    const token = cookies.patientToken || null;
+    const token = Cookies.get("patientToken") || null;
     setPatientToken(token);
   }, []);
-
 
   return (
     <nav className="bg-white shadow-md">
@@ -39,17 +36,53 @@ export default  function Navbar() {
         </div>
 
         <div className="hidden md:block">
-          { patientToken ? (
-            <Link href="/profile"  className="bg-teal-600 text-white px-6 py-2 mr-12 rounded-full hover:bg-teal-700">
+          {patientToken ? (
+            <Link
+              href="/profile"
+              className="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700"
+            >
               Profile
             </Link>
           ) : (
-            <Link
-              href="/login"
-              className="bg-teal-600 text-white px-6 py-2 mr-12 rounded-full hover:bg-teal-700"
-            >
-              Login
-            </Link>
+            <div className="relative">
+              <button
+                onClick={() => setIsLoginDropdownOpen(!isLoginDropdownOpen)}
+                className="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700 flex items-center"
+              >
+                Login <ChevronDown size={16} className="ml-1" />
+              </button>
+              {isLoginDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border border-gray-100">
+                
+                  <Link
+                    href="/login"
+                    className="flex items-center px-4 py-3 text-gray-800 hover:bg-teal-50"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                  >
+                    <User size={16} className="mr-2 text-teal-600" />
+                    <span>Login as User</span>
+                  </Link>
+                 
+                  <Link
+                    href="/doctor/send_otp"
+                    className="flex items-center px-4 py-3 text-gray-800 hover:bg-teal-50"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                  >
+                    <Stethoscope size={16} className="mr-2 text-teal-600" />
+                    <span>Login as Doctor</span>
+                  </Link>
+    
+                  <Link
+                    href="/admin_login" 
+                    className="flex items-center px-4 py-3 text-gray-800 hover:bg-teal-50 rounded-b-md"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                  >
+                    <Lock size={16} className="mr-2 text-teal-600" />
+                    <span>Admin Login</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
