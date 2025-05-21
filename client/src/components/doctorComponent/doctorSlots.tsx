@@ -6,7 +6,6 @@ import { generateSlot, getSlot, editSlot, deleteSlot, generateRecurringSlots } f
 import { Slot, SlotFormData } from '@/type/doctor';
 import RecurringSlotModal from './recurring.slot.modal';
 import { useParams } from 'next/navigation';
-import { response } from 'express';
 
 const SimpleCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
