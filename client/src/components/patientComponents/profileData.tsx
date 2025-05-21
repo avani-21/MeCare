@@ -153,7 +153,7 @@ const UserProfile = () => {
       <div className="flex items-start gap-8">
        <div className="w-20 h-20 rounded-full overflow-hidden relative">
   <Image
-    src={userData?.profileImage || "/user.jpg"}
+    src={userData?.profileImage || " "}
     alt="Profile"
     fill
     className="object-cover"
