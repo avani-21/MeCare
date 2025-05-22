@@ -35,7 +35,10 @@ app.use((req, res, next) => {
 app.use(cookieParser());
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin:[ 'http://localhost:3000',
+      "https://mecare-ecru.vercel.app/",
+      "https://mecare.zapto.org"
+    ],
     credentials: true,
   }));
 
