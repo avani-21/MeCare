@@ -3,7 +3,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { Server as HttpServer } from 'http';
 import redisClient from './config/redis';
 import ChatModel from './models/chat/chatModel';
-import logger from '../src/utils/logger';
+import logger from './utils/logger';
 
 class SocketService {
   private io: Server;
