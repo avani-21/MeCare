@@ -5,7 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server.ts"
+    "buid":"tsc",
+    "start": "nodemon dist/server.ts"
   },
   "keywords": [],
   "author": "",
