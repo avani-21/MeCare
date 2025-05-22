@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+# Increase memory limit for tsc build
+RUN node --max_old_space_size=4096 ./node_modules/.bin/tsc
 
 # Production stage
 FROM node:23-slim
