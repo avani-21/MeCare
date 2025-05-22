@@ -5,9 +5,9 @@ COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 
+ENV NODE_OPTIONS=--max-old-space-size=2048
 RUN npm run build
 
-RUN node --max-old-space-size=2048 ./node_modules/.bin/tsc
 
 # Production stage
 FROM node:23-slim
