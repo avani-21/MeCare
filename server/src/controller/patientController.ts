@@ -10,7 +10,7 @@ import logger from "../utils/logger";
 import { AuthenticatedRequest } from "../middleware/patientAuthMiddleware";
 import { StatusMessages } from "../utils/message";
 import { IReview } from "../models/reviews/reviewInterface";
-import { comment } from "postcss";
+
 
 
 
