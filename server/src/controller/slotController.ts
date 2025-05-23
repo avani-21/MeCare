@@ -6,9 +6,8 @@ import logger from "../utils/logger";
 import { HttpStatus } from "../utils/httptatus";
 import { errorResponse, successResponse } from "../types/types";
 import { StatusMessages } from "../utils/message";
-import { s } from "vite/dist/node/types.d-aGj9QkWt";
 import { AuthenticatedRequest } from "../middleware/patientAuthMiddleware";
-import { Http } from "winston/lib/winston/transports";
+
 
 @injectable()
 export class SlotController{
