@@ -24,24 +24,25 @@ connectDb();
 redisClient.connect()
 
 app.use(express.json())
-// app.use(cors({ origin: '*' }));
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-  next();
-});
+
 
 
 app.use(cookieParser());
 
 app.use(cors({
-    origin:[ 'http://localhost:3000',
-      "https://mecare-ecru.vercel.app",
-      "https://mecare.zapto.org"
-    ],
-    credentials: true,
-  }));
+  origin: [
+    'http://localhost:3000',
+    'https://mecare-ecru.vercel.app',
+    'https://mecare.zapto.org'
+  ],
+  credentials: true,
+}));
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  next();
+});
 
 
 app.use(morganMiddleware)
