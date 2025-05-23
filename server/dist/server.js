@@ -21,7 +21,7 @@ const patientRoutes_1 = __importDefault(require("./routes/patientRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const doctorRoutes_1 = __importDefault(require("./routes/doctorRoutes"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const morgen_1 = __importDefault(require("./middleware/morgen"));
+const morgan_1 = __importDefault(require("./middleware/morgan"));
 const logger_1 = __importDefault(require("./utils/logger"));
 const socket_1 = __importDefault(require("./socket"));
 const http_1 = require("http");
@@ -47,7 +47,7 @@ app.use((0, cors_1.default)({
     ],
     credentials: true,
 }));
-app.use(morgen_1.default);
+app.use(morgan_1.default);
 socket_1.default.getInstance(server);
 app.use("/api/patient", patientRoutes_1.default);
 app.use("/api/admin", adminRoutes_1.default);
