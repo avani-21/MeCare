@@ -1,12 +1,12 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-// import { cookies } from "next/headers";
+
 
 const API = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true,
 });
-
+console.log(API)
 API.interceptors.request.use((config) => {
     let accessToken = "";
      console.log(config.url)
