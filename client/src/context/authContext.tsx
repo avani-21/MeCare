@@ -2,7 +2,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { getProfile } from "@/lib/api/patient/patient";
 import { AuthContextType, IPatient, ILogin, IGoogleAuth } from "@/type/patient";
-import { googleSignIn, login } from '@/lib/api/patient/auth';
+import { googleSignIn, loginUser } from '@/lib/api/patient/auth';
 
 const PatientContext = createContext<AuthContextType>({
   patientData: null,
@@ -39,7 +39,7 @@ export const PatientProvider = ({ children }: { children: ReactNode }) => {
   const loginUser = async (data: ILogin) => {
     setLoading(true);
     try {
-      const response = await login(data);
+      const response = await loginUser(data);
 
       if (response.accessToken || response.refreshToken) {
 
