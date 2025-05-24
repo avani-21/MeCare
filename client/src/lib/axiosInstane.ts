@@ -19,6 +19,7 @@ API.interceptors.request.use((config) => {
         accessToken = Cookies.get("patientToken") || "";
     }
     if (accessToken) {
+        console.log(accessToken)
         config.headers.Authorization = `Bearer ${accessToken}`;
     }
 

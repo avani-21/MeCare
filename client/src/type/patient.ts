@@ -40,6 +40,7 @@ export interface IResendOtp{
 }
 
 export interface ILogin{
+   patientId?:string;
     email?:string;
     password?:string;
     accessToken?:string;

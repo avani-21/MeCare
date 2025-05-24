@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ErrorState } from '@/type/patient';
+import img from "../../../public/logo.png"
 
 const UserProfile = () => {
   const [userData, setUserData] = useState<IPatient | null>(null);
@@ -153,7 +154,7 @@ const UserProfile = () => {
       <div className="flex items-start gap-8">
        <div className="w-20 h-20 rounded-full overflow-hidden relative">
   <Image
-    src={userData?.profileImage || " "}
+    src={userData?.profileImage || img}
     alt="Profile"
     fill
     className="object-cover"

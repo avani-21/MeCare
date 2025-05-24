@@ -11,8 +11,11 @@ export default function Navbar() {
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [patientToken, setPatientToken] = useState<string | null>(null);
 
+
   useEffect(() => {
-    const token = Cookies.get("patientToken") || null;
+    let tokentoken=Cookies.get("patientToken")
+    console.log("token",tokentoken)
+     const token =localStorage.getItem("patientId")
     setPatientToken(token);
   }, []);
 

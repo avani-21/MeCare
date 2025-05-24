@@ -6,6 +6,8 @@ export function middleware(request: NextRequest) {
   const doctorToken = request.cookies.get("DoctorToken")?.value;
   const patientToken = request.cookies.get("patientToken")?.value;
 
+  console.log("HI",patientToken)
+
  
   const adminRoutes = [
     "/doctor_register",

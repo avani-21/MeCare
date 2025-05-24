@@ -9,6 +9,7 @@ import { ILogin } from "@/type/patient";
 import { auth, googlePprovider, signInWithPopup } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { toast } from "sonner";
+import { loginUser } from "@/lib/api/patient/auth";
 import { IGoogleAuth } from "@/type/patient";
 import { usePatient } from "@/context/authContext";
 
@@ -68,7 +69,10 @@ export default function PatientLogin() {
     };
 
     try {
-      await login(data); 
+     let response= await loginUser(data); 
+if (response.patientId) {
+  localStorage.setItem("patientId", response.patientId);
+}
       toast.success("User logged in successfully");
       router.replace("/");
     } catch (error: any) {
