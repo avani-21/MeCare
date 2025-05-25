@@ -70,11 +70,13 @@ export default function PatientLogin() {
 
     try {
      let response= await loginUser(data); 
+     console.log(response.patientId)
 if (response.patientId) {
   localStorage.setItem("patientId", response.patientId);
-}
       toast.success("User logged in successfully");
       router.replace("/");
+}
+  
     } catch (error: any) {
       toast.error(error.message || "Your account is blocked by Admin or your verification process is not completed");
       console.error("Error logging in:", error);
