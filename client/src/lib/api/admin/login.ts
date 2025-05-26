@@ -4,6 +4,7 @@ import { IAdminLogin } from "@/type/admin";
 const adminLogin=async (data:IAdminLogin)=>{
 try {
     let response=await API.post("admin/admin_login",data);
+    localStorage.setItem("adminToken",response.data.accessToken)
     return response.data
 } catch (error:any) {
     console.log(error)

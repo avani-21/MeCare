@@ -11,12 +11,12 @@ API.interceptors.request.use((config) => {
     let accessToken = "";
      console.log(config.url)
     if (config.url?.startsWith("/doctor")) {
-        accessToken = Cookies.get("DoctorToken") || "";
+        accessToken = Cookies.get("DoctorToken") || localStorage.getItem("doctorToken") || "";
     }
     else if (config.url?.startsWith("/admin")) {
-        accessToken = Cookies.get("adminToken") || "";
+        accessToken = Cookies.get("adminToken") || localStorage.getItem("adminToken") || "";
     } else {
-        accessToken = Cookies.get("patientToken") || "";
+        accessToken = Cookies.get("patientToken") || localStorage.getItem("patientToken") || "";
     }
     if (accessToken) {
         console.log(accessToken)

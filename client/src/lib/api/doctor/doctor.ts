@@ -25,6 +25,7 @@ const verifyOtp = async (email: string, otp: string) => {
         const response = await API.post("/doctor/verify_otp", { email, otp })
         console.log(response.data.id)
         localStorage.setItem("doctorId", response.data.id)
+        localStorage.setItem("doctorToken",response.data.accessToken)
         return response
     } catch (error: any) {
         throw new Error(error.message)
