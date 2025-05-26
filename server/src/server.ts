@@ -14,8 +14,6 @@ import { createServer } from "http"
 import redisClient from "./config/redis"
 
 
-console.log("Reflect.hasOwnMetadata exists:", typeof Reflect.hasOwnMetadata !== "undefined");
-
 dotenv.config();
 const app=express()
 const server=createServer(app)
@@ -23,7 +21,6 @@ const server=createServer(app)
 connectDb();
 redisClient.connect()
 
-app.use(express.json())
 
 
 
@@ -35,17 +32,21 @@ app.use(cors({
     'https://mecare.zapto.org'
   ],
   credentials: true,
+  exposedHeaders: ['set-cookie'],
+ allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 
 
 
 app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Expose-Headers', 'Set-Cookie');
   next();
 });
 
+
+app.use(express.json())
 app.use(cookieParser());
 app.use(morganMiddleware)
 
