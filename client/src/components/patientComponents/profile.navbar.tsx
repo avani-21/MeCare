@@ -39,7 +39,7 @@ const ProfileNav = () => {
 
   
   useEffect(() => {
-    const token= Cookies.get("patientToken");
+    const token= localStorage.getItem("patientToken");
     if(token){
  setPatientToken(token);
     }
