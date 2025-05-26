@@ -21,6 +21,7 @@ const server=createServer(app)
 connectDb();
 redisClient.connect()
 
+app.use(express.json())
 
 
 
@@ -40,13 +41,11 @@ app.use(cors({
 
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Expose-Headers', 'Set-Cookie');
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
   next();
 });
 
-
-app.use(express.json())
 app.use(cookieParser());
 app.use(morganMiddleware)
 
