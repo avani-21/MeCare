@@ -190,7 +190,7 @@ const logOut = async () => {
   try {
     const response = await API.post('/patient/logOut') 
 
-    // Remove cookies immediately
+
     document.cookie = 'patientToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     localStorage.removeItem("patientToken")
     return response

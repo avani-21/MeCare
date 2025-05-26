@@ -15,7 +15,7 @@ export default function Navbar() {
   useEffect(() => {
     let tokentoken=Cookies.get("patientToken")
     console.log("token",tokentoken)
-     const token =localStorage.getItem("patientId")
+     const token =localStorage.getItem("patientToken")
     setPatientToken(token);
   }, []);
 
