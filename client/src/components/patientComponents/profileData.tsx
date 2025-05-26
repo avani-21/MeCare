@@ -203,7 +203,7 @@ const UserProfile = () => {
               <div className="mb-4 flex flex-col items-center">
                 <div className="relative w-24 h-24 rounded-full overflow-hidden">
                   <Image
-                    src={imagePreviewUrl || "/user.jpg"}
+                    src={imagePreviewUrl || img}
                     alt="Profile Preview"
                     layout="fill"
                     objectFit="cover"

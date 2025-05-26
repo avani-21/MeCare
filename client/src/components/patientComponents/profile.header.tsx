@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { cookies } from "next/headers";
+import img from "../../../public/logo.png"
 
 const ProfileHeader = () => {
   const [patientData, setPatientData] = useState<IPatient | null>(null);
@@ -40,19 +41,7 @@ const ProfileHeader = () => {
   }, [router]);
 
    
-  // if (loading) {
-  //   return (
-  //     <div className="flex justify-center">
-  //       <div className="flex items-center gap-4">
-  //         <div className="w-20 h-20 rounded-full bg-gray-200 animate-pulse" />
-  //         <div className="flex flex-col gap-2">
-  //           <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
-  //           <div className="h-6 w-32 bg-gray-200 animate-pulse rounded" />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+
 
  useEffect(()=>{
   if(patientData?.isBlock){
@@ -65,7 +54,7 @@ const ProfileHeader = () => {
       <div className="flex items-center gap-4">
       <div className="w-20 h-20 rounded-full overflow-hidden relative">
   <Image
-    src={patientData?.profileImage || "/user.jpg"}
+    src={patientData?.profileImage || img }
     alt="Profile"
     fill
     className="object-cover"
