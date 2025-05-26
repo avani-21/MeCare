@@ -192,7 +192,7 @@ const logOut = async () => {
 
     // Remove cookies immediately
     document.cookie = 'patientToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-
+    localStorage.removeItem("patientToken")
     return response
   } catch (error) {
     console.error('Logout error:', error)
