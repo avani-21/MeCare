@@ -45,7 +45,7 @@ const googleSignIn=async (data:IGoogleAuth):Promise<IGoogleAuth>=>{
  try {
   
     const response=await API.post("/patient/google_auth",data)
-     localStorage.setItem("patientId",response.data.accessToken)
+     localStorage.setItem("patientToken",response.data.data.accessToken)
     return response.data
  } catch (error:any) {
       console.log(error)
