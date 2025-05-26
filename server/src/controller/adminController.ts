@@ -33,7 +33,7 @@ export class AdminController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                   domain:".vercel.app",
                 path:"/",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
@@ -42,7 +42,7 @@ export class AdminController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                domain:".vercel.app",
                 path:"/",
                 maxAge: 30 * 24 * 60 * 60 * 1000,
             });
@@ -76,14 +76,14 @@ export class AdminController {
             // Set new cookies
             res.cookie("adminToken", newAccessToken, {
                 httpOnly: false,
-                 domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                 domain:".vercel.app",
                 path:"/",
                 maxAge: 15 * 60 * 1000,
             });
     
             res.cookie("refreshToken", newRefreshToken, {
                 httpOnly: false,
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                domain:".vercel.app" ,
                 path:"/",
                 maxAge: 30 * 24 * 60 * 60 * 1000,
             });

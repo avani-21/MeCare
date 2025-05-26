@@ -79,7 +79,7 @@ class PatientAuthController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                  domain:".vercel.app",
                 path:"/",
                 maxAge: 1 * 24 * 60 * 60 * 1000,
             });
@@ -88,7 +88,7 @@ class PatientAuthController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                  domain:".vercel.app",
                 path:"/",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
@@ -126,7 +126,7 @@ class PatientAuthController {
                     httpOnly: false,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: "none",
-                           domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                    domain:".vercel.app",
                 path:"/",
                     maxAge: 15 * 60 * 1000 
                 });
@@ -163,7 +163,7 @@ class PatientAuthController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                domain:".vercel.app",
                 path:"/",
                 maxAge: 1 * 24 * 60 * 60 * 1000,
             });
@@ -172,7 +172,7 @@ class PatientAuthController {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "none",
-                domain:process.env.NODE_ENV ==="production" ?".vercel.app" : undefined,
+                domain:".vercel.app",
                 path:"/",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
