@@ -14,6 +14,8 @@ import { createServer } from "http"
 import redisClient from "./config/redis"
 
 
+console.log("Reflect.hasOwnMetadata exists:", typeof Reflect.hasOwnMetadata !== "undefined");
+
 dotenv.config();
 const app=express()
 const server=createServer(app)
@@ -33,8 +35,6 @@ app.use(cors({
     'https://mecare.zapto.org'
   ],
   credentials: true,
-  exposedHeaders: ['set-cookie'],
- allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 
