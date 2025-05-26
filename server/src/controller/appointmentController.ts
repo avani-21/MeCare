@@ -183,39 +183,6 @@ export class AppointmentController{
         }
     }
 
-    // async createPrescription(req: Request, res: Response) {
-    //     try {
-
-    //         console.log(req.body);
-            
-    //         const medicationsArray = req.body.medications
-    //             .split(/[\n,]/)
-    //             .map((med: string) => med.trim())
-    //             .filter((med: string) => med.length > 0);
-    
-    //         const prescriptionData: IPrescription = {
-    //             appointmentId: req.body.appointmentId,
-    //             doctorId: req.params.id,
-    //             patientId: req.body.patientId,
-    //             diagnosis: req.body.diagnosis,
-    //             medications: medicationsArray, 
-    //             instructions: req.body.instructions,
-    //         };
-    
-    //         let response = await this._appointmentService.createPrescription(prescriptionData);
-    //         if (response) {
-    //             logger.info("Prescription created successfully");
-    //             return res.status(HttpStatus.CREATED).json(
-    //                 successResponse(StatusMessages.CREATED, response)
-    //             );
-    //         }
-    //     } catch (error: any) {
-    //         logger.error("Error adding prescription", error);
-    //         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
-    //             errorResponse(StatusMessages.INTERNAL_SERVER_ERROR, error.message)
-    //         );
-    //     }
-    // }
 
     async createPrescription(req:Request,res:Response){
         try {
@@ -225,6 +192,14 @@ export class AppointmentController{
              if(!Array.isArray(medications)){
                 throw new Error("Medication must be an array of object")
              }
+
+                if (
+            !Types.ObjectId.isValid(appointmentId) ||
+            !Types.ObjectId.isValid(doctorId) ||
+            !Types.ObjectId.isValid(patientId)
+        ) {
+            return res.status(400).json(errorResponse("Invalid ID(s) provided"));
+        }
 
              for(const med of medications){
                 if(!med.frequency || !med.name || !med.dosage || !med.duration){
