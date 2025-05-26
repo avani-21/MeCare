@@ -93,6 +93,41 @@ export default function Navbar() {
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
+
+      {isOpen && (
+  <div className="md:hidden mt-4 space-y-2">
+    <Link href="/" className="block text-gray-800 hover:text-teal-600">
+      Home
+    </Link>
+    <Link href="/doctors" className="block text-gray-800 hover:text-teal-600">
+      Doctors
+    </Link>
+    <Link href="/about_us" className="block text-gray-800 hover:text-teal-600">
+      About Us
+    </Link>
+    {patientToken ? (
+      <Link
+        href="/profile"
+        className="block text-teal-600 font-semibold mt-2"
+      >
+        Profile
+      </Link>
+    ) : (
+      <div className="space-y-2">
+        <Link href="/login" className="block text-gray-800 hover:text-teal-600">
+          Login as User
+        </Link>
+        <Link href="/doctor/send_otp" className="block text-gray-800 hover:text-teal-600">
+          Login as Doctor
+        </Link>
+        <Link href="/admin_login" className="block text-gray-800 hover:text-teal-600">
+          Admin Login
+        </Link>
+      </div>
+    )}
+  </div>
+)}
+
     </nav>
   );
 }
