@@ -32,7 +32,7 @@ const ProfileHeader = () => {
   };
 
   useEffect(() => {
-     const token = Cookies.get("patientToken");
+     const token = localStorage.getItem("patientToken");
     if (!token) {
       router.push("/login");
       return;
@@ -46,6 +46,8 @@ const ProfileHeader = () => {
  useEffect(()=>{
   if(patientData?.isBlock){
     document.cookie = 'patientToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    localStorage.removeItem("patientToken")
+    localStorage.removeItem("patientId")
   }
  },[])
 
