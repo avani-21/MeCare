@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("adminToken")?.value || localStorage.getItem('patientToken');
-  const doctorToken = request.cookies.get("DoctorToken")?.value || localStorage.getItem("doctorToken");
+  const doctorToken = request.cookies.get("DoctorToken")?.value || localStorage.getItem('doctorToken');
   const patientToken = request.cookies.get("patientToken")?.value || localStorage.getItem("adminToken");
 
   console.log("HI",patientToken)

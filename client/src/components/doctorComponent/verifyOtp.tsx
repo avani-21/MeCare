@@ -43,11 +43,9 @@ export default function DoctorOTPVerification() {
       const response = await verifyOtp(email, otp);
       setMessage("OTP Verified Successfully!");
       let id=localStorage.getItem("doctorId")
-      if(response.status === 200){   
-
       router.push(`/doctor/${id}/dashboard`);
       toast.success("Enter to doctor dashboard")
-      }
+      
  
     } catch (err: any) {
       toast.error(err?.response?.data?.message)
