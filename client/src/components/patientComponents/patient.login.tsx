@@ -70,9 +70,9 @@ export default function PatientLogin() {
 
     try {
      let response= await loginUser(data); 
-     console.log(response.patientId)
-if (response.patientId) {
+if (response.patientId && response.accessToken) {
   localStorage.setItem("patientId", response.patientId);
+  localStorage.setItem("patientToken",response.accessToken)
       toast.success("User logged in successfully");
       router.replace("/");
 }

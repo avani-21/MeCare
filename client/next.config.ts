@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   
-  // Add these new configurations:
+
   async headers() {
     return [
       {
@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  // If using API routes that need to set cookies
+
   async rewrites() {
     return [
       {
