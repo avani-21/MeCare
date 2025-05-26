@@ -16,7 +16,7 @@ export default function DoctorOTPVerification() {
   let router = useRouter();
   const email = typeof window !== "undefined" ? localStorage.getItem("email") || "" : "";
 
-  // Countdown Timer
+
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
