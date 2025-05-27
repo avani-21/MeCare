@@ -15,7 +15,7 @@ const UserProfile = () => {
   const [editedData, setEditedData] = useState<Partial<IPatient>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState<ErrorState & { age?: string }>({});
+  const [error, setError] = useState<ErrorState & { age?: string ,phone?:string}>({});
   const [loading, setLoading] = useState<boolean>(false);
 
   const [passwordData, setPasswordData] = useState({
@@ -51,12 +51,20 @@ const UserProfile = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'age') {
-      // Prevent negative age
       if (parseInt(value) < 0) {
         setError(prev => ({ ...prev, age: 'Age cannot be negative' }));
         return;
       } else {
         setError(prev => ({ ...prev, age: undefined }));
+      }
+
+    }
+
+     if (name === 'phone') {
+      if (value.length !== 10) {
+        setError(prev => ({ ...prev, phone: 'Phone number must be exactly 10 characters' }));
+      } else {
+        setError(prev => ({ ...prev, phone: undefined }));
       }
     }
     setEditedData(prev => ({ ...prev, [name]: value }));
@@ -75,11 +83,13 @@ const UserProfile = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check for age validation before submitting
+    
     if (error.age) {
       toast.error('Please correct the age field');
       return;
     }
+
+    
 
     try {
       setLoading(true);
