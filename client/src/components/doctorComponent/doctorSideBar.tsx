@@ -3,7 +3,7 @@ import { useState,useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../../public/logo.png";
-import { Menu, X, Home, Calendar, User, MessageSquare,ClipboardList} from "lucide-react";
+import { Menu, X, Home, Calendar, User, MessageSquare, Clock, Star, MessagesSquare } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { logOut } from "@/lib/api/doctor/doctor";
 
@@ -28,9 +28,9 @@ export default function DcotorSideNav({ children }: NavbarLayoutProps) {
     { name: "Dashboard", icon: <Home size={20} />, href: `/doctor/${doctorId}/dashboard` },
     { name: "Appointment", icon: <Calendar size={20} />, href: `/doctor/${doctorId}/appointment` },
     { name: "My Profile", icon: <User size={20} />, href: `/doctor/${doctorId}/profile` },
-    { name: "Slot Managment", icon: <User size={20} />, href: `/doctor/${doctorId}/slot_managment` },
-    { name: "Review Book", icon: <ClipboardList size={20} />, href: `/doctor/${doctorId}/reviews` },
-    { name: "My Chats", icon: <ClipboardList size={20} />, href:  `/doctor/${doctorId}/chat` },
+    { name: "Slot Managment", icon: <Clock size={20} />, href: `/doctor/${doctorId}/slot_managment` },
+    { name: "Review Book", icon: <Star size={20} />, href: `/doctor/${doctorId}/reviews` },
+    { name: "My Chats", icon: <MessagesSquare size={20} />, href: `/doctor/${doctorId}/chat` },
   ];
 
   const handleLogout=async ()=>{
