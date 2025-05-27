@@ -6,6 +6,7 @@ import { generateSlot, getSlot, editSlot, deleteSlot, generateRecurringSlots } f
 import { Slot, SlotFormData } from '@/type/doctor';
 import RecurringSlotModal from './recurring.slot.modal';
 import { useParams } from 'next/navigation';
+import { error } from 'console';
 
 const SimpleCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -191,7 +192,10 @@ const SimpleCalendar = () => {
         setCreatedSlots([...createdSlots, newSlot]);
         getSlots(currentPage);
         resetForm();
+      }else{
+        toast.error("Slot alredy exist")
       }
+      
     } catch (error) {
       toast.error('Error creating slots');
       console.error(error);
