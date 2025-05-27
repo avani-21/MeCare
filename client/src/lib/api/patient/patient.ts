@@ -5,7 +5,6 @@ import { IApp } from "@/type/patient";
 const getProfile=async ()=>{
  try {
     let response=await API.get("/patient/patient_profile")
-    console.log("PROOOO:",response)
     return response
  } catch (error) {
    console.error("Error fetching patient data:", error); 
@@ -24,11 +23,7 @@ const appointmentBook=async (data:IApp)=>{
 
 const updateProfile = async (updatedData: FormData) => {
   try {
-    console.log("Sending data to server...");
-    // Log FormData contents before sending
-    for (const [key, value] of updatedData.entries()) {
-      console.log(key, value);
-    }
+
 
     const response = await API.patch(`/patient/profile`, updatedData, {
       headers: {
@@ -41,7 +36,7 @@ const updateProfile = async (updatedData: FormData) => {
     if (error.response) {
       console.log("Server response:", error.response.data);
     }
-    throw error; // Re-throw to handle in component
+    throw error; 
   }
 };
 
@@ -95,7 +90,6 @@ const getAppointmentData=async (page:number,limit:number,filterStatus:string)=>{
       filterStatus
      }
      })
-     console.log("response",response)
      return response
   } catch  (error:any) {
     throw error
@@ -105,7 +99,6 @@ const getAppointmentData=async (page:number,limit:number,filterStatus:string)=>{
 const getPrescription=async (appointmentId:string)=>{
   try {
      let response=API.get(`/patient/prescription/${appointmentId}`)
-     console.log(response)
      return response
   } catch (error:any) {
      console.log("Eoor fetxhing prescription",error)
@@ -113,13 +106,11 @@ const getPrescription=async (appointmentId:string)=>{
 }
 
 const addReview=async (reviewData:IReview)=>{
-  console.log(reviewData)
   try {
     if (!reviewData.doctorId || typeof reviewData.doctorId !== 'string') {
       throw new Error('Invalid appointment ID');
     }
     let response=await API.post(`/patient/review/${reviewData.doctorId}`,reviewData)
-    console.log(response)
     return response
   } catch (error) {
      console.log(error)
@@ -129,7 +120,6 @@ const addReview=async (reviewData:IReview)=>{
 const getReview=async (appointmentId:string)=>{
   try {
       let response= await API.get(`/patient/review/${appointmentId}`)
-      console.log("review",response.data.data)
       return response.data.data
   } catch (error) {
     console.log(error)
@@ -139,7 +129,6 @@ const getReview=async (appointmentId:string)=>{
 const getReviews=async (doctorId:string)=>{
   try {
       let response=await API.get(`/doctor/reviews/${doctorId}`)
-       console.log(response)
        return response.data
   } catch (error) {
     console.log("Error",error)
@@ -160,7 +149,6 @@ const updateReview=async(reviewId:string,updatedData:IReview)=>{
 const sendMessage=async (messageData:IMessage)=>{
   try {
     let response=await API.post(`/patient//send_message`,messageData)
-    console.log(response)
     return response.data
   } catch (error) {
     console.log("Error",error)

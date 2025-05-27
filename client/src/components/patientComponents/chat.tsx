@@ -183,10 +183,7 @@ const Chat: React.FC = () => {
     }
   };
 
-  // useEffect(()=>{
-  //      console.log("current",currentUserId)
-  //     console.log("sender",messages)
-  // })
+
 
   return (
     <div className="flex h-[600px] ml-[8%] mr-[8%] border border-gray-200 rounded-lg shadow-sm bg-white">

@@ -21,9 +21,7 @@ const getDoctors = async (
       }
     });
 
-    console.log("Doctor data:", response.data.data);
-    console.log("Total:", response.data.data.meta.total);
-
+ 
     return {
       doctors: response.data.data,
       total: response.data.data.meta.total
@@ -36,7 +34,6 @@ const getDoctors = async (
 const getSingleDoctor=async (id:string)=>{
     try {
         let response=await API.get(`/patient/doctors/${id}`)
-        console.log(response)
         return response
     } catch (error:any) {
         throw new Error(error.response?.data?.error || error.message)
@@ -46,7 +43,6 @@ const getSingleDoctor=async (id:string)=>{
 const getSlots=async (id:string)=>{
     try {
           let response=await API.get(`/patient/doctors/slot/${id}`)
-          console.log(response)
           return response
     } catch (error:any) {
         throw new Error(error?.response?.data?.message || error.message)
@@ -56,7 +52,6 @@ const getSlots=async (id:string)=>{
 const getPrescription=async (appointmentId:string)=>{
   try {
       let response=await API.get(`/patient/prescription/${appointmentId}`)
-      console.log(response)
       return response.data.data
   } catch (error) {
      console.log(error)  

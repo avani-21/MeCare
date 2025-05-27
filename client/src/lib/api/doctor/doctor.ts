@@ -23,7 +23,7 @@ const sendOtp = async (email: string) => {
 const verifyOtp = async (email: string, otp: string) => {
     try {
         const response = await API.post("/doctor/verify_otp", { email, otp })
-        console.log(response.data.id)
+       
         localStorage.setItem("doctorId", response.data.id)
         localStorage.setItem("doctorToken",response.data.accessToken)
         return response
@@ -54,7 +54,6 @@ const getDoctor = async () => {
     try {
         let doctorId = localStorage.getItem("doctorId")
         let response = await API.get(`/doctor/fetch_doctor/${doctorId}`)
-        console.log("doctor data", response.data.data)
         return response.data.data
     } catch (error: any) {
         throw new Error(error.message)
@@ -63,12 +62,12 @@ const getDoctor = async () => {
 
 const updateDoctor = async (doctorId: string, formData: FormData) => {
     try {
-        console.log(doctorId)
+       
         let result = await API.put(`/doctor/profile/${doctorId}`, formData, {
             headers: { "Content-Type": "multipart/form-data" }
         })
 
-        console.log(result)
+     
         return result
 
     } catch (error: any) {
@@ -95,7 +94,7 @@ const getDoctorAppointment = async (
         ...(endDate && { endDate })
       }
     });
-    console.log("response", response);
+  
     return response.data;
   } catch (error: any) {
     console.error("Error fetching appointments:", error);
@@ -106,7 +105,7 @@ const getDoctorAppointment = async (
 const generateSlot = async (slotData: SlotFormData) => {
     try {
         let response = await API.post(`/doctor/create_slot/${doctorId}`, slotData)
-        console.log(response)
+ 
         return response.data.data
     } catch (error) {
         console.log(error)
@@ -138,10 +137,10 @@ const getSlot = async (doctorId: string, page: number, limit: number, startDate?
 }
 
 const updateAppointmentStatus = async (appointmentId: string, newStatus: string) => {
-    console.log(newStatus)
+   
     try {
         let response = await API.patch(`/doctor/update_status/${appointmentId}`, { status: newStatus })
-        console.log(response)
+       
         if (response) {
             return response?.data.data
         }
@@ -153,7 +152,7 @@ const updateAppointmentStatus = async (appointmentId: string, newStatus: string)
 const createPrescription = async (prescriptionData: IPresscription) => {
     try {
         let response = await API.post(`/doctor/prescription/${doctorId}`, prescriptionData)
-        console.log(response)
+      
         return response.data.data
     } catch (error: any) {
         console.log(error)
@@ -163,7 +162,7 @@ const createPrescription = async (prescriptionData: IPresscription) => {
 const getPrescription = async (appointmentId: string) => {
     try {
         let response = await API.get(`/doctor/prescription/${appointmentId}`)
-        console.log(response)
+
         return response.data.data
     } catch (error) {
         console.log(error)
@@ -184,7 +183,7 @@ const getDashboard = async (doctorId:string) => {
 const getReviews = async () => {
     try {
         let response = await API.get(`/doctor/reviews/${doctorId}`)
-        console.log(response)
+        
         return response.data
     } catch (error) {
         console.log("Error", error)
@@ -195,7 +194,7 @@ const getReviews = async () => {
 const sendMessage = async (messageData: IMessage) => {
     try {
         let response = await API.post(`/doctor/send_message`, messageData)
-        console.log(response)
+        
         return response.data
     } catch (error) {
         console.log("Error", error)
@@ -224,6 +223,8 @@ const getPatientByDoctors = async () => {
 const logOut = async () => {
     try {
         document.cookie = 'DoctorToken=;  expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        localStorage.removeItem("doctorToken")
+        localStorage.removeItem("doctorId")
 
     } catch (error) {
         console.error('Logout error:', error)

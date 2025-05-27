@@ -33,7 +33,6 @@ const DoctorProfile = ({ params }: { params: Params }) => {
       const result = await getSingleDoctor(params.id);
       if (result.data.success) {
         setDoctorData(result.data.data);
-        toast.success("Doctor data loaded successfully");
       } else {
         toast.error("Failed to load doctor data");
       }
@@ -61,7 +60,6 @@ const DoctorProfile = ({ params }: { params: Params }) => {
         
         const dates:string[] | any = [...new Set(slotsData.map((slot: any) => {
           const date = new Date(slot.date);
-          // Manually format in YYYY-MM-DD (UTC)
           return [
             date.getUTCFullYear(),
             String(date.getUTCMonth() + 1).padStart(2, '0'),
@@ -100,7 +98,7 @@ const DoctorProfile = ({ params }: { params: Params }) => {
       };
 
       const response = await appointmentBook(appointmentData);
-      console.log("appointment", response?.data.data._id);
+
       localStorage.setItem("AppointmentId", response?.data.data._id);
       if (response?.data?.success) {
         setSlotModalVisible(false);
@@ -366,8 +364,7 @@ const DoctorProfile = ({ params }: { params: Params }) => {
                     <FaChevronRight />
                   </button>
                 </div>
-                
-                {/* Calendar Days */}
+             
                 <div className="grid grid-cols-7 gap-1 mb-2">
                   {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
                     <div key={day} className="text-center text-xs font-medium text-gray-500">
@@ -376,7 +373,7 @@ const DoctorProfile = ({ params }: { params: Params }) => {
                   ))}
                 </div>
                 
-                {/* Calendar Dates */}
+              
                 <div className="grid grid-cols-7 gap-1">
                   {renderCalendarDays().map((dayObj, index) => {
                     const dateStr = dayObj.date.toISOString().split('T')[0];

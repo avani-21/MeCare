@@ -28,7 +28,7 @@ export default function AdminNavbar({ children }: NavbarLayoutProps) {
     { name: "List Doctor", icon: <Calendar size={20} />, href: "/admin/doctors" },
     { name: "Register Doctor", icon: <User size={20} />, href: "/doctor_register" },
     { name: "Patient Directory", icon: <ClipboardList size={20} />, href: "/admin/patient_directory" },
-    { name: "Manage Appointment", icon: <MessageSquare size={20} />, href: "/manag_appointments" },
+    { name: "Appointments", icon: <MessageSquare size={20} />, href: "/manag_appointments" },
 
   ];
 

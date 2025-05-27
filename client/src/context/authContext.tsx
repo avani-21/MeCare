@@ -56,13 +56,6 @@ export const PatientProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await googleSignIn(data);
      
-      if (response.accessToken || response.refreshToken) {
-
-        console.log('Received tokens:', {
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken
-        });
-      }
       await fetchPatientProfile();
     } catch (error: any) {
       setError(error?.response?.data?.error || error.message);
@@ -75,8 +68,7 @@ export const PatientProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
   
     setPatientData(null);
-    
-    console.log('Clearing authentication tokens');
+ 
 
   };
 

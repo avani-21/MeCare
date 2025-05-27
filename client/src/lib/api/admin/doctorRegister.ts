@@ -7,8 +7,6 @@ const registerDoctor=async (formData:FormData)=>{
         headers:{"Content-Type":"multipart/form-data"},
         
       })
-
-      console.log(response)
       return response
     }catch(error:any){
        throw new Error(error?.response?.data.message || error)
@@ -24,7 +22,6 @@ const listDoctor=async (page:number=1,limit:number=10,filters?:{specialization?:
       specialization: filters?.specialization,
     }
    })
-   console.log(response)
    return {
     doctors:response.data.data.data,
     total:response.data.data.meta.total
@@ -37,7 +34,6 @@ const listDoctor=async (page:number=1,limit:number=10,filters?:{specialization?:
 const editDoctor=async (id:string,doctorData:IDoctor)=>{
   try {
      const response=await API.put(`/admin/doctor/${id}`,doctorData)
-     console.log(response)
      return response
   } catch (error:any) {
     throw new Error(error.response?.data?.message || "Error occured during fetching doctor data")

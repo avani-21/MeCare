@@ -89,7 +89,6 @@ export default function PatientSignup() {
       let emil=localStorage.setItem("email",formData.email)
 
       const result=await signUpPatient(signUpData);
-      console.log("Signup successfully",result)
       if(result){
         router.push("/verify_email")
       }

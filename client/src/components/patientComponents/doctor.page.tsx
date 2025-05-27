@@ -196,7 +196,7 @@ export default function DoctorsList() {
                   {/* Appointment Buttons */}
                   <div className="mt-4 md:absolute md:top-4 md:right-4">
                     <button 
-                      className="px-4 py-2 bg-teal-600 text-white rounded shadow-md"
+                      className="px-4 py-2 bg-teal-600 text-white rounded shadow-md cursor-pointer"
                       onClick={() => router.push(`/doctors/${doctor._id}`)}
                     >
                       Show Availability

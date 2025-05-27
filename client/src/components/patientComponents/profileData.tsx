@@ -15,8 +15,8 @@ const UserProfile = () => {
   const [editedData, setEditedData] = useState<Partial<IPatient>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState<ErrorState>({});
-  const [loading,setLoading]=useState<boolean>(false)
+  const [error, setError] = useState<ErrorState & { age?: string }>({});
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
@@ -28,7 +28,7 @@ const UserProfile = () => {
       const response = await getProfile();
       if (response.data.data) {
         setUserData(response.data.data);
-        setEditedData(response.data.data); // Initialize editedData with fetched data
+        setEditedData(response.data.data);
         setImagePreviewUrl(response.data.data.profileImage || null);
       }
     } catch (error: any) {
@@ -43,12 +43,22 @@ const UserProfile = () => {
   const handleEditClick = () => {
     if (userData) {
       setIsEditModalOpen(true);
-      setSelectedFile(null); // Reset selected file when opening modal
+      setSelectedFile(null);
+      setError({}); // Clear errors when opening modal
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'age') {
+      // Prevent negative age
+      if (parseInt(value) < 0) {
+        setError(prev => ({ ...prev, age: 'Age cannot be negative' }));
+        return;
+      } else {
+        setError(prev => ({ ...prev, age: undefined }));
+      }
+    }
     setEditedData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -65,11 +75,16 @@ const UserProfile = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check for age validation before submitting
+    if (error.age) {
+      toast.error('Please correct the age field');
+      return;
+    }
+
     try {
-      setLoading(true)
+      setLoading(true);
       const formData = new FormData();
       
-      // Append all form fields to FormData
       formData.append("name", editedData.name || "");
       formData.append("phone", editedData.phone || "");
       formData.append("age", String(editedData.age || ""));
@@ -77,32 +92,25 @@ const UserProfile = () => {
       formData.append("city", editedData.city || "");
       formData.append("gender", editedData.gender || "");
       
-      // Append the image file if selected
       if (selectedFile) {
         formData.append("profileImage", selectedFile);
-      }
-  
-      // Properly debug FormData contents
-      console.log("FormData contents:");
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value);
       }
   
       const response = await updateProfile(formData);
       
       if (response?.data?.success) {
         toast.success('Profile updated successfully');
-        await fetchData(); // Refresh the data
+        await fetchData();
         setIsEditModalOpen(false);
       } else {
         toast.error(response?.data?.message || 'Failed to update profile');
       }
     } catch (error: any) {
-      setLoading(false)
+      setLoading(false);
       console.error('Update failed:', error.message);
       toast.error('Failed to update profile');
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,14 +160,14 @@ const UserProfile = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
       <div className="flex items-start gap-8">
-       <div className="w-20 h-20 rounded-full overflow-hidden relative">
-  <Image
-    src={userData?.profileImage || img}
-    alt="Profile"
-    fill
-    className="object-cover"
-  />
-</div>
+        <div className="w-20 h-20 rounded-full overflow-hidden relative">
+          <Image
+            src={userData?.profileImage || img}
+            alt="Profile"
+            fill
+            className="object-cover"
+          />
+        </div>
         <div className="flex-1">
           <h2 className="text-2xl font-semibold mb-2">{userData?.name ?? 'Loading...'}</h2>
           <hr className="border-t border-gray-300 mb-4" />
@@ -186,7 +194,7 @@ const UserProfile = () => {
             </button>
             <button
               onClick={() => setIsChangePasswordModalOpen(true)}
-              className="px-4 py-2 border  border-gray-400 rounded-full hover:bg-teal-200 transition"
+              className="px-4 py-2 border border-gray-400 rounded-full hover:bg-teal-200 transition"
             >
               Change Password
             </button>
@@ -194,9 +202,8 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center b z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-md w-96 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
             <form onSubmit={handleSave}>
@@ -247,12 +254,15 @@ const UserProfile = () => {
               <div className="mb-4">
                 <label className="block font-medium">Age</label>
                 <input
-                  type="text"
+                  type="number"
                   name="age"
                   value={editedData.age || ''}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded"
                 />
+                {error.age && (
+                  <p className="text-red-500 text-sm mt-1">{error.age}</p>
+                )}
               </div>
 
               <div className="mb-4">
@@ -294,7 +304,7 @@ const UserProfile = () => {
 
               <div className="flex justify-between mt-4">
                 <button
-                  type="button" // Prevent form submission on cancel
+                  type="button"
                   onClick={() => setIsEditModalOpen(false)}
                   className="px-4 py-2 bg-gray-400 rounded"
                 >
@@ -303,8 +313,9 @@ const UserProfile = () => {
                 <button
                   type="submit"
                   className="px-4 py-2 bg-teal-500 text-white rounded"
+                  disabled={loading || !!error.age}
                 >
-                  {loading ? "Updating ...." :"Save"}
+                  {loading ? "Updating ...." : "Save"}
                 </button>
               </div>
             </form>
@@ -312,9 +323,8 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* Change Password Modal */}
       {isChangePasswordModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center  z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-md w-96">
             <h2 className="text-xl font-semibold mb-4">Change Password</h2>
             <div className="mb-4">

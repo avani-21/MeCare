@@ -86,7 +86,7 @@ if (response.patientId && response.accessToken) {
   const googleauthSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googlePprovider);
-      console.log(result);
+
 
       const user: User = result.user;
       const { email } = user;

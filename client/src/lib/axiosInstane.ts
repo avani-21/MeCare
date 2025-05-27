@@ -6,10 +6,10 @@ const API = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true,
 });
-console.log(API)
+
 API.interceptors.request.use((config) => {
     let accessToken = "";
-     console.log(config.url)
+ 
     if (config.url?.startsWith("/doctor")) {
         accessToken = Cookies.get("DoctorToken") || localStorage.getItem("doctorToken") || "";
     }
@@ -19,7 +19,7 @@ API.interceptors.request.use((config) => {
         accessToken = Cookies.get("patientToken") || localStorage.getItem("patientToken") || "";
     }
     if (accessToken) {
-        console.log(accessToken)
+        
         config.headers.Authorization = `Bearer ${accessToken}`;
     }
 

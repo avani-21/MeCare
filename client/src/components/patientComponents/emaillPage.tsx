@@ -24,7 +24,7 @@ export default function Sendotp() {
     try {
       setLoading(true);
       const response = await sendOtp(email)
-      console.log(response);
+    
       if (response.status === 200) {
         toast.success("Otp sent to your email");
         router.push("/verify_otp");

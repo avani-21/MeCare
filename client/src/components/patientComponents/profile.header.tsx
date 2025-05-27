@@ -19,7 +19,6 @@ const ProfileHeader = () => {
     try {
       setLoading(true);
       const response = await getProfile();
-      console.log(response)
       if (response.data.data) {
         setPatientData(response.data.data);
       }

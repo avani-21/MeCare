@@ -38,7 +38,7 @@ export default function OTPVerification() {
       setLoading(true)
       const email = localStorage.getItem("email") || "";
       const result = await verifyOtp(email, otp);
-      console.log(result)
+   
       if(result){
         router.push("/login")
       }

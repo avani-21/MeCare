@@ -16,7 +16,6 @@ export default function ConfirmBooking() {
 
   const fetchAppointmentData = async () => {
     const response = await getAppointment();
-    console.log("appointmentdata", response);
     setAppointmentData(response?.data?.data);
   };
 
@@ -32,7 +31,6 @@ export default function ConfirmBooking() {
     const stripe = await stripePromise;
     if(stripe){
         let response=await markAsPaid()
-        console.log(response);
     }
     const {error}=await stripe!.redirectToCheckout({sessionId})
     if(error){

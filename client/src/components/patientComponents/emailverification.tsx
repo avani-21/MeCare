@@ -39,7 +39,7 @@ export default function OTPVerification() {
       setLoading(true)
       const email = localStorage.getItem("email") || "";
       const result = await verifyOtp(email, otp);
-      console.log(result)
+
       if(result){
         toast.success("Otp verification Successful")
         router.push("/reset_password")

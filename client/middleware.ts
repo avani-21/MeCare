@@ -6,7 +6,6 @@
 //   const doctorToken = request.cookies.get("DoctorToken")?.value || localStorage.getItem('doctorToken');
 //   const patientToken = request.cookies.get("patientToken")?.value || localStorage.getItem("adminToken");
 
-//   console.log("HI",patientToken)
 
  
 //   const adminRoutes = [

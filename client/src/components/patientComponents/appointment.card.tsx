@@ -162,7 +162,7 @@ export default function AppointmentCard() {
         setReviewText(response.comment || "");
         setIsEditReviewModalOpen(true);
       } else {
-        console.log("No review found for appointment:", selectedAppointment._id);
+
         setIsReviewModalOpen(true);
       }
     } catch (error) {

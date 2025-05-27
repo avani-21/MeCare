@@ -32,7 +32,6 @@ const resendOtp=async (email:string):Promise<IResendOtp>=>{
 const loginUser=async (data:ILogin):Promise<ILogin>=>{
     try {
     const response=await API.post("/patient/login",data);
-    console.log("data",response.data)
      return response.data
     } catch (error:any) {
         console.log(error)
