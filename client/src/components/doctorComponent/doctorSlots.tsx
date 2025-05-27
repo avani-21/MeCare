@@ -253,6 +253,7 @@ const SimpleCalendar = () => {
         getSlots();
         resetForm();
       }
+      toast.error("Slot already exist")
     } catch (error) {
       toast.error('Error updating slot');
       console.error(error);
