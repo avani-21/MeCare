@@ -139,19 +139,60 @@ async getAllSlotsByDoctor(doctorId: string, page: number = 1, limit: number = 10
     return { slots, total };
 }
 
-      async editSlot(slotId: string, slotData: ISlot): Promise<ISlot | null> {
-         const updatedSlots=await SlotModel.findByIdAndUpdate(
-          slotId,
-          {$set:slotData},
-          {new:true}
-         )
+async editSlot(slotId: string, slotData: ISlot): Promise<ISlot | null> {
+    const { doctorId, date, startTime, endTime } = slotData;
 
-         if(!updatedSlots){
-          logger.error("Slot not fount")
-           throw new Error("Slot not found")
-         }
-         return updatedSlots
-      }
+
+    if (!doctorId || !date || !startTime || !endTime) {
+        throw new Error("All fields are required");
+    }
+
+
+    const slotDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    slotDate.setHours(0, 0, 0, 0);
+
+    if (slotDate.getTime() === today.getTime()) {
+        const now = new Date();
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const slotStartDateTime = new Date(date);
+        slotStartDateTime.setHours(startHour, startMinute, 0, 0);
+
+        if (slotStartDateTime <= now) {
+            throw new Error("Start time must be greater than the current time");
+        }
+    }
+
+
+    const existingSlot = await SlotModel.findOne({
+        _id: { $ne: slotId }, 
+        doctorId,
+        date,
+        $or: [
+            { startTime: { $lt: endTime }, endTime: { $gt: startTime } },
+            { startTime, endTime }
+        ]
+    });
+
+    if (existingSlot) {
+        throw new Error("The doctor already has a slot at the given date and time");
+    }
+
+  
+    const updatedSlot = await SlotModel.findByIdAndUpdate(
+        slotId,
+        { $set: slotData },
+        { new: true }
+    );
+
+    if (!updatedSlot) {
+        logger.error("Slot not found");
+        throw new Error("Slot not found");
+    }
+
+    return updatedSlot;
+}
 
       async cancelSlot(slotId: string): Promise<ISlot | null> {
          const cancelSlot=await SlotModel.findByIdAndDelete(slotId)

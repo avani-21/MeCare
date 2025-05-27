@@ -44,7 +44,7 @@ const UserProfile = () => {
     if (userData) {
       setIsEditModalOpen(true);
       setSelectedFile(null);
-      setError({}); // Clear errors when opening modal
+      setError({}); 
     }
   };
 
